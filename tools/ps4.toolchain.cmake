@@ -1,6 +1,5 @@
 # CMake toolchain file for PlayStation 4 using OpenOrbis PS4 Toolchain
-set(CMAKE_SYSTEM_NAME FreeBSD)
-set(CMAKE_SYSTEM_VERSION 12)
+set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 set(PS4 TRUE)
