@@ -104,6 +104,12 @@ fi
 
 install_patches
 
+if [ -f "${OO_PS4_TOOLCHAIN:-}/lib/freetype_pic/libfreetype.a" ]; then
+    step "replacing non-PIC prebuilt freetype with PS4 PIC freetype"
+    mkdir -p "$engine/external/freetype2/prebuilt/linux/64-bit"
+    cp -f "${OO_PS4_TOOLCHAIN}/lib/freetype_pic/libfreetype.a" "$engine/external/freetype2/prebuilt/linux/64-bit/libfreetype.a"
+fi
+
 if [ ! -f "$engine/cocos/cocos2d.h" ] || [ ! -d "$engine/external/Box2D/prebuilt" ]; then
     echo "engine setup incomplete: $engine" >&2
     exit 1

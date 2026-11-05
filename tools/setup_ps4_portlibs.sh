@@ -79,4 +79,28 @@ echo "==> Compiling curl for PS4..."
     find "$WORKDIR/curl-build" -name "libcurl.a" -exec cp -f {} "${OO_PS4_TOOLCHAIN}/lib/" \;
 )
 
+# 5. Build freetype (with -fPIC for PS4 Position Independent Executable)
+echo "==> Compiling freetype for PS4..."
+(
+    repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
+    git clone --quiet --depth 1 --branch VER-2-10-4 https://github.com/freetype/freetype.git "$WORKDIR/freetype"
+    mkdir -p "$WORKDIR/freetype-build"
+    cmake -S "$WORKDIR/freetype" -B "$WORKDIR/freetype-build" \
+      -DCMAKE_TOOLCHAIN_FILE="$repo_dir/tools/ps4.toolchain.cmake" \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+      -DFT_WITH_ZLIB=OFF \
+      -DFT_WITH_BZIP2=OFF \
+      -DFT_WITH_PNG=OFF \
+      -DFT_WITH_HARFBUZZ=OFF \
+      -DFT_WITH_BROTLI=OFF
+    cmake --build "$WORKDIR/freetype-build" --target freetype -j"$(nproc)"
+    cp -f "$WORKDIR/freetype-build/libfreetype.a" "${OO_PS4_TOOLCHAIN}/lib/"
+    mkdir -p "${OO_PS4_TOOLCHAIN}/include/freetype2"
+    cp -r "$WORKDIR/freetype/include/"* "${OO_PS4_TOOLCHAIN}/include/freetype2/"
+    mkdir -p "${OO_PS4_TOOLCHAIN}/lib/freetype_pic"
+    cp -f "$WORKDIR/freetype-build/libfreetype.a" "${OO_PS4_TOOLCHAIN}/lib/freetype_pic/libfreetype.a"
+)
+
 echo "==> PS4 portlibs successfully built and installed to ${OO_PS4_TOOLCHAIN}!"
