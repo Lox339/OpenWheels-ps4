@@ -111,15 +111,19 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get update -qq -o Acquire::Retries=3 || true
-          sudo apt-get install -y -qq --no-install-recommends -o Acquire::Retries=3 clang lld llvm cmake ninja-build wine wine64 python3 unar
-          wine_bin="$(command -v wine || command -v wine64 || find /usr -name "wine" -o -name "wine64" 2>/dev/null | grep -E "bin/wine" | head -n 1 || true)"
+          sudo apt-get install -y -qq --no-install-recommends -o Acquire::Retries=3 \
+            clang lld llvm cmake ninja-build python3 unar xvfb wine wine32:i386 wine64 libwine:i386 || \
+          sudo apt-get install -y -qq --no-install-recommends -o Acquire::Retries=3 \
+            clang lld llvm cmake ninja-build python3 unar xvfb wine wine64
+          wine_bin="$(command -v wine || command -v wine64 || find /usr -name "wine" 2>/dev/null | grep -E "bin/wine$" | head -n 1 || true)"
           if [ -n "$wine_bin" ]; then
             sudo ln -sf "$wine_bin" /usr/local/bin/wine
             sudo ln -sf "$wine_bin" /usr/local/bin/wine64
           fi
           echo "Wine binary at: $(command -v wine || true)"
-          wine --version || true
+          wine --version || wine64 --version || true
       - name: Setup OpenOrbis Toolchain
         run: |
           echo "Setting up OpenOrbis PS4 Toolchain..."

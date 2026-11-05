@@ -223,11 +223,15 @@ def main():
                 "/usr/local/bin/wine64",
                 "/usr/bin/wine",
                 "/usr/bin/wine64",
-                "/usr/lib/wine/wine64",
                 "/usr/lib/wine/wine",
+                "/usr/lib/wine/wine64",
             ]
             wine_bin = next((c for c in candidates if c and os.path.exists(c)), "wine")
-            cmd = [wine_bin, pub_cmd, "img_create", "--oformat", "pkg", "--skip_digest", gp4_path, out_dir]
+            xvfb = shutil.which("xvfb-run")
+            if xvfb:
+                cmd = [xvfb, "-a", wine_bin, pub_cmd, "img_create", "--oformat", "pkg", "--skip_digest", gp4_path, out_dir]
+            else:
+                cmd = [wine_bin, pub_cmd, "img_create", "--oformat", "pkg", "--skip_digest", gp4_path, out_dir]
         else:
             cmd = [pub_cmd, "img_create", "--oformat", "pkg", "--skip_digest", gp4_path, out_dir]
 
