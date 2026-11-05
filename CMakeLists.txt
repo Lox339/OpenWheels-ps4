@@ -244,7 +244,7 @@ if(APPLE)
     endif()
 endif()
 if(PS4 OR CMAKE_SYSTEM_NAME STREQUAL "PS4" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR DEFINED ENV{OO_PS4_TOOLCHAIN})
-    target_link_libraries(${APP_NAME} -lc -lkernel -lc++ -lSceVideoOut -lSceUserService -lScePad -lSceSysmodule -lSceNet -lSceNetCtl -lSceAudioOut -lScePigletv2VSH -lz -lpng -lcurl)
+    target_link_libraries(${APP_NAME} -lc -lkernel -lc++ -lSceVideoOut -lSceUserService -lScePad -lSceSysmodule -lSceNet -lSceNetCtl -lSceAudioOut -lScePigletv2VSH -lz -lpng -lcurl -lpolarssl)
     find_program(CREATE_EBOOT NAMES create-eboot HINTS "$ENV{OO_PS4_TOOLCHAIN}/bin/linux" "$ENV{OO_PS4_TOOLCHAIN}/bin/windows" "$ENV{OO_PS4_TOOLCHAIN}/bin/macos")
     if(CREATE_EBOOT)
         add_custom_command(TARGET ${APP_NAME} POST_BUILD
