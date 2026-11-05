@@ -27,7 +27,7 @@ index ff0983a..470021f 100644
  
      if(WINDOWS)
 +    elseif(PS4)
-+        list(APPEND PLATFORM_SPECIFIC_LIBS kernel SceVideoOut SceUserService ScePad SceSysmodule SceNet SceNetCtl SceAudioOut ScePigletv2VSH)
++        list(APPEND PLATFORM_SPECIFIC_LIBS kernel SceVideoOut SceUserService ScePad SceSysmodule SceNet SceNetCtl SceAudioOut ScePigletv2VSH z png curl)
          list(APPEND PLATFORM_SPECIFIC_LIBS ws2_32 userenv psapi winmm Version Iphlpapi opengl32)
 -    elseif(LINUX)
 +    elseif(LINUX AND NOT PS4)
@@ -146,3 +146,25 @@ index e577564..71f41c1 100644
  elseif(LINUX)
  
      if(NOT CMAKE_CROSSCOMPILING)
+diff --git a/external/CMakeLists.txt b/external/CMakeLists.txt
+index 2824e83..8a67df1 100644
+--- a/external/CMakeLists.txt
++++ b/external/CMakeLists.txt
+@@ -74,7 +74,7 @@ if(NOT LINUX)
+     )
+ endif(NOT LINUX)
+     
+-if(LINUX)
++if(LINUX AND NOT PS4)
+     add_subdirectory(linux-specific/fmod)
+     target_link_libraries(external 
+         ext_fmod
+@@ -107,7 +107,7 @@ if(WINDOWS)
+     )
+ endif()
+ 
+-if(WINDOWS OR MACOSX OR LINUX)
++if((WINDOWS OR MACOSX OR LINUX) AND NOT PS4)
+     add_subdirectory(glfw3)
+     target_link_libraries(external 
+         ext_glfw3

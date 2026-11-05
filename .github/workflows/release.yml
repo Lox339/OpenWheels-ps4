@@ -121,6 +121,10 @@ jobs:
           tar -xzf toolchain-llvm-*.tar.gz -C ./ || true
           echo "OO_PS4_TOOLCHAIN=${PWD}/OpenOrbis/PS4Toolchain" >> "${GITHUB_ENV}"
           echo "${PWD}/OpenOrbis/PS4Toolchain/bin/linux" >> "${GITHUB_PATH}"
+      - name: Setup PS4 Portlibs (zlib, libpng, curl)
+        run: |
+          chmod +x tools/setup_ps4_portlibs.sh
+          tools/setup_ps4_portlibs.sh
       - name: Setup CyB1K PS4 Fake PKG Tools
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
