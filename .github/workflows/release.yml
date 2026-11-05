@@ -134,14 +134,14 @@ jobs:
           mkdir -p tools/ps4_fake_pkg_tools
           if [ -n "${CYB1K_URL:-}" ]; then
             echo "Downloading Fake PKG Tools from custom URL..."
-            curl -fL -o pkgtools.archive "${CYB1K_URL}"
+            curl -fL --retry 5 --retry-delay 2 --retry-all-errors -o pkgtools.archive "${CYB1K_URL}"
             unar -D -f -o tools/ps4_fake_pkg_tools pkgtools.archive
           elif [ -n "${CYB1K_PAT:-}" ]; then
             echo "Cloning Fake PKG Tools with secret token..."
             git clone --depth 1 "https://${CYB1K_PAT}@github.com/CyB1K/PS4-Fake-PKG-Tools-3.87.git" tools/ps4_fake_pkg_tools
           else
             echo "Downloading CyB1K PS4 Fake PKG Tools V7 release..."
-            curl -fL -o pkgtools.rar "https://github.com/CyB1K/PS4-Fake-PKG-Tools-3.87/releases/download/v7/PS4_Fake_PKG_Tools_3.87_V7.rar"
+            curl -fL --retry 5 --retry-delay 2 --retry-all-errors -o pkgtools.rar "https://github.com/CyB1K/PS4-Fake-PKG-Tools-3.87/releases/download/v7/PS4_Fake_PKG_Tools_3.87_V7.rar"
             unar -D -f -o tools/ps4_fake_pkg_tools pkgtools.rar
           fi
           echo "CYB1K_TOOLS_DIR=${PWD}/tools/ps4_fake_pkg_tools" >> "${GITHUB_ENV}"
