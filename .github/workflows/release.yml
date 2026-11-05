@@ -116,10 +116,8 @@ jobs:
       - name: Setup OpenOrbis Toolchain
         run: |
           echo "Setting up OpenOrbis PS4 Toolchain..."
-          f=toolchain-llvm-18
-          curl -fLJO https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.4/$f.zip || \
-          curl -fLJO https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.3/toolchain-llvm-18.2.zip
-          unzip -q toolchain*.zip
+          curl -fLJO https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.4/toolchain-llvm-18.tar.gz || \
+          (curl -fLJO https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.3/toolchain-llvm-18.2.zip && unzip -q toolchain*.zip)
           tar -xzf toolchain-llvm-*.tar.gz -C ./ || true
           echo "OO_PS4_TOOLCHAIN=${PWD}/OpenOrbis/PS4Toolchain" >> "${GITHUB_ENV}"
           echo "${PWD}/OpenOrbis/PS4Toolchain/bin/linux" >> "${GITHUB_PATH}"
