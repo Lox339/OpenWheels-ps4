@@ -39,7 +39,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ENGINE_CACHE_VERSION: 1
+  ENGINE_CACHE_VERSION: 2
 
 jobs:
   game-data:
@@ -108,8 +108,8 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends clang lld llvm cmake ninja-build wine64 python3 unar
+          sudo apt-get update -qq -o Acquire::Retries=3 || true
+          sudo apt-get install -y -qq --no-install-recommends -o Acquire::Retries=3 clang lld llvm cmake ninja-build wine64 python3 unar
           if [ ! -f /usr/local/bin/wine ] && [ -f /usr/bin/wine64 ]; then
             sudo ln -sf /usr/bin/wine64 /usr/local/bin/wine
           fi
@@ -158,6 +158,10 @@ jobs:
           path: game-data
       - name: Build for PS4
         run: |
+          if [ -f "${OO_PS4_TOOLCHAIN:-}/lib/freetype_pic/libfreetype.a" ]; then
+            mkdir -p thirdparty/cocos2d-x/external/freetype2/prebuilt/linux/64-bit
+            cp -f "${OO_PS4_TOOLCHAIN}/lib/freetype_pic/libfreetype.a" thirdparty/cocos2d-x/external/freetype2/prebuilt/linux/64-bit/libfreetype.a
+          fi
           cmake -S . -B build-ps4 \
             -DCMAKE_TOOLCHAIN_FILE=tools/ps4.toolchain.cmake \
             -DCMAKE_BUILD_TYPE=Release \
