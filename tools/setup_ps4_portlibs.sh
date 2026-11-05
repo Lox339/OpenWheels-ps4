@@ -3,7 +3,7 @@ set -euo pipefail
 
 : "${OO_PS4_TOOLCHAIN:?OO_PS4_TOOLCHAIN must be set}"
 
-echo "==> Setting up PS4 portlibs (zlib, libpng, curl)..."
+echo "==> Setting up PS4 portlibs (zlib, libpng, polarssl, curl)..."
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 
@@ -37,7 +37,18 @@ echo "==> Compiling libpng for PS4..."
     cp -f libpng.a "${OO_PS4_TOOLCHAIN}/lib/"
 )
 
-# 3. Build libcurl (HTTP-only, static)
+# 3. Build polarssl (SSL/TLS for libcurl)
+echo "==> Compiling polarssl for PS4..."
+(
+    cd "$WORKDIR/oosdk_libraries/polarssl-1.3.9"
+    # shellcheck disable=SC2086
+    clang $PS4_CFLAGS -c -Iinclude library/*.c
+    "$AR_CMD" rcs libpolarssl.a ./*.o
+    cp -r include/polarssl "${OO_PS4_TOOLCHAIN}/include/"
+    cp -f libpolarssl.a "${OO_PS4_TOOLCHAIN}/lib/"
+)
+
+# 4. Build libcurl (HTTP-only, static with PolarSSL)
 echo "==> Compiling curl for PS4..."
 (
     repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
@@ -52,7 +63,11 @@ echo "==> Compiling curl for PS4..."
       -DCURL_DISABLE_LDAP=ON \
       -DCURL_DISABLE_LDAPS=ON \
       -DENABLE_IPV6=OFF \
-      -DCMAKE_USE_OPENSSL=OFF \
+      -DCURL_DISABLE_CRYPTO_AUTH=ON \
+      -DENABLE_THREADED_RESOLVER=OFF \
+      -DUSE_UNIX_SOCKETS=OFF \
+      -DCMAKE_USE_POLARSSL=ON \
+      -DCURL_CA_PATH=none \
       -DENABLE_MANUAL=OFF
     cmake --build "$WORKDIR/curl-build" --target libcurl -j"$(nproc)"
     mkdir -p "${OO_PS4_TOOLCHAIN}/include/curl"

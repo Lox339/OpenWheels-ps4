@@ -22,13 +22,13 @@ diff --git a/cmake/Modules/CocosConfigDepend.cmake b/cmake/Modules/CocosConfigDe
 index ff0983a..470021f 100644
 --- a/cmake/Modules/CocosConfigDepend.cmake
 +++ b/cmake/Modules/CocosConfigDepend.cmake
-@@ -3,8 +3,10 @@ macro(cocos2dx_depend)
+@@ -4,6 +4,8 @@ macro(cocos2dx_depend)
      set(PLATFORM_SPECIFIC_LIBS)
  
      if(WINDOWS)
-+    elseif(PS4)
-+        list(APPEND PLATFORM_SPECIFIC_LIBS kernel SceVideoOut SceUserService ScePad SceSysmodule SceNet SceNetCtl SceAudioOut ScePigletv2VSH z png curl)
          list(APPEND PLATFORM_SPECIFIC_LIBS ws2_32 userenv psapi winmm Version Iphlpapi opengl32)
++    elseif(PS4)
++        list(APPEND PLATFORM_SPECIFIC_LIBS kernel SceVideoOut SceUserService ScePad SceSysmodule SceNet SceNetCtl SceAudioOut ScePigletv2VSH z png curl polarssl)
 -    elseif(LINUX)
 +    elseif(LINUX AND NOT PS4)
          # need review those libs: X11 Xi Xrandr Xxf86vm Xinerama Xcursor rt m
@@ -146,6 +146,24 @@ index e577564..71f41c1 100644
  elseif(LINUX)
  
      if(NOT CMAKE_CROSSCOMPILING)
+diff --git a/cocos/storage/local-storage/LocalStorage.cpp b/cocos/storage/local-storage/LocalStorage.cpp
+--- a/cocos/storage/local-storage/LocalStorage.cpp
++++ b/cocos/storage/local-storage/LocalStorage.cpp
+@@ -34,7 +34,7 @@
+ #include "storage/local-storage/LocalStorage.h"
+ #include "platform/CCPlatformMacros.h"
+ 
+-#if (CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID)
++#if (CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID && CC_TARGET_PLATFORM != CC_PLATFORM_PS4)
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -235,4 +235,4 @@ void localStorageClear()
+         printf("Error in localStorage.clear()\n");
+ }
+ 
+-#endif // #if (CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID)
++#endif // #if (CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID && CC_TARGET_PLATFORM != CC_PLATFORM_PS4)
 diff --git a/external/CMakeLists.txt b/external/CMakeLists.txt
 index 2824e83..8a67df1 100644
 --- a/external/CMakeLists.txt
