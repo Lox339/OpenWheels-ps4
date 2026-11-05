@@ -56,9 +56,10 @@ echo "==> Compiling curl for PS4..."
     cmake -S "$WORKDIR/oosdk_libraries/curl-7.64.1" -B "$WORKDIR/curl-build" \
       -DCMAKE_TOOLCHAIN_FILE="$repo_dir/tools/ps4.toolchain.cmake" \
       -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DCURL_STATICLIB=ON \
       -DBUILD_TESTING=OFF \
       -DBUILD_CURL_EXE=OFF \
-      -DCURL_STATICLIB=ON \
       -DHTTP_ONLY=ON \
       -DCURL_DISABLE_LDAP=ON \
       -DCURL_DISABLE_LDAPS=ON \
@@ -68,11 +69,14 @@ echo "==> Compiling curl for PS4..."
       -DUSE_UNIX_SOCKETS=OFF \
       -DCMAKE_USE_POLARSSL=ON \
       -DCURL_CA_PATH=none \
+      -DHAVE_LIBIDN2=OFF \
+      -DHAVE_IDN2_H=OFF \
+      -DHAVE_LIBSOCKET=OFF \
       -DENABLE_MANUAL=OFF
     cmake --build "$WORKDIR/curl-build" --target libcurl -j"$(nproc)"
     mkdir -p "${OO_PS4_TOOLCHAIN}/include/curl"
     cp -f "$WORKDIR/oosdk_libraries/curl-7.64.1/include/curl/"*.h "${OO_PS4_TOOLCHAIN}/include/curl/"
-    cp -f "$WORKDIR/curl-build/lib/libcurl.a" "${OO_PS4_TOOLCHAIN}/lib/"
+    find "$WORKDIR/curl-build" -name "libcurl.a" -exec cp -f {} "${OO_PS4_TOOLCHAIN}/lib/" \;
 )
 
 echo "==> PS4 portlibs successfully built and installed to ${OO_PS4_TOOLCHAIN}!"
