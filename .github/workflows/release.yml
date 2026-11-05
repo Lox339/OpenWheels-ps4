@@ -15,6 +15,9 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
+      - accurate-physics
     tags: ['v*']
   workflow_dispatch:
     inputs:
