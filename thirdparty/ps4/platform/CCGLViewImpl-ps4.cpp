@@ -6,6 +6,44 @@
 #include <cstdio>
 #include <cstdlib>
 
+extern "C" {
+typedef void (*PFNGLBINDVERTEXARRAYOESPROC)(GLuint array);
+typedef void (*PFNGLDELETEVERTEXARRAYSOESPROC)(GLsizei n, const GLuint *arrays);
+typedef void (*PFNGLGENVERTEXARRAYSOESPROC)(GLsizei n, GLuint *arrays);
+typedef void* (*PFNGLMAPBUFFEROESPROC)(GLenum target, GLenum access);
+typedef GLboolean (*PFNGLUNMAPBUFFEROESPROC)(GLenum target);
+
+void glBindVertexArrayOES(GLuint array) {
+    static PFNGLBINDVERTEXARRAYOESPROC fn = (PFNGLBINDVERTEXARRAYOESPROC)eglGetProcAddress("glBindVertexArrayOES");
+    if (!fn) fn = (PFNGLBINDVERTEXARRAYOESPROC)eglGetProcAddress("glBindVertexArray");
+    if (fn) fn(array);
+}
+
+void glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays) {
+    static PFNGLDELETEVERTEXARRAYSOESPROC fn = (PFNGLDELETEVERTEXARRAYSOESPROC)eglGetProcAddress("glDeleteVertexArraysOES");
+    if (!fn) fn = (PFNGLDELETEVERTEXARRAYSOESPROC)eglGetProcAddress("glDeleteVertexArrays");
+    if (fn) fn(n, arrays);
+}
+
+void glGenVertexArraysOES(GLsizei n, GLuint *arrays) {
+    static PFNGLGENVERTEXARRAYSOESPROC fn = (PFNGLGENVERTEXARRAYSOESPROC)eglGetProcAddress("glGenVertexArraysOES");
+    if (!fn) fn = (PFNGLGENVERTEXARRAYSOESPROC)eglGetProcAddress("glGenVertexArrays");
+    if (fn) fn(n, arrays);
+}
+
+void* glMapBufferOES(GLenum target, GLenum access) {
+    static PFNGLMAPBUFFEROESPROC fn = (PFNGLMAPBUFFEROESPROC)eglGetProcAddress("glMapBufferOES");
+    if (!fn) fn = (PFNGLMAPBUFFEROESPROC)eglGetProcAddress("glMapBuffer");
+    return fn ? fn(target, access) : nullptr;
+}
+
+GLboolean glUnmapBufferOES(GLenum target) {
+    static PFNGLUNMAPBUFFEROESPROC fn = (PFNGLUNMAPBUFFEROESPROC)eglGetProcAddress("glUnmapBufferOES");
+    if (!fn) fn = (PFNGLUNMAPBUFFEROESPROC)eglGetProcAddress("glUnmapBuffer");
+    return fn ? fn(target) : GL_FALSE;
+}
+}
+
 NS_CC_BEGIN
 
 GLViewImpl* GLViewImpl::create(const std::string& viewName)

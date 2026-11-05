@@ -15,15 +15,18 @@ PS4_CFLAGS="--target=x86_64-pc-freebsd12-elf -fPIC -O2 -isysroot ${OO_PS4_TOOLCH
 AR_CMD="$(command -v llvm-ar 2>/dev/null || command -v llvm-ar-18 2>/dev/null || command -v ar)"
 echo "==> Using archiver: $AR_CMD"
 
-# 1. Build zlib
-echo "==> Compiling zlib for PS4..."
+# 1. Build full zlib (with gzopen, gzread, gzclose)
+echo "==> Compiling full zlib for PS4..."
 (
-    cd "$WORKDIR/oosdk_libraries/zlib_partial"
+    git clone --quiet --depth 1 --branch v1.2.13 https://github.com/madler/zlib.git "$WORKDIR/zlib"
+    cd "$WORKDIR/zlib"
     # shellcheck disable=SC2086
-    clang $PS4_CFLAGS -c -Iinclude source/*.c
+    clang $PS4_CFLAGS -c -I. ./*.c
     "$AR_CMD" rcs libz.a ./*.o
-    cp -f include/zlib.h include/zconf.h "${OO_PS4_TOOLCHAIN}/include/"
+    cp -f zlib.h zconf.h "${OO_PS4_TOOLCHAIN}/include/"
     cp -f libz.a "${OO_PS4_TOOLCHAIN}/lib/"
+    mkdir -p "${OO_PS4_TOOLCHAIN}/lib/zlib_full"
+    cp -f libz.a "${OO_PS4_TOOLCHAIN}/lib/zlib_full/libz.a"
 )
 
 # 2. Build libpng
