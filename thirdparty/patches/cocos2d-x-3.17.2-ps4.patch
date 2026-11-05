@@ -87,6 +87,47 @@ index d26f02b..b82324f 100644
  #endif
  
  #include "base/CCDirector.h"
+diff --git a/cocos/base/CCController.cpp b/cocos/base/CCController.cpp
+index faddf63..0e97a63 100644
+--- a/cocos/base/CCController.cpp
++++ b/cocos/base/CCController.cpp
+@@ -26,7 +26,7 @@
+ 
+ #include "base/CCController.h"
+ 
+-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 )
++#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_PS4 )
+ 
+ #include "base/CCEventDispatcher.h"
+ #include "base/CCEventController.h"
+@@ -126,4 +126,4 @@ void Controller::onAxisEvent(int axisCode, float value, bool isAnalog)
+ 
+ NS_CC_END
+ 
+-#endif // (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
++#endif // (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_PS4)
+diff --git a/cocos/base/CCController.h b/cocos/base/CCController.h
+index 412fda2..efe3638 100644
+--- a/cocos/base/CCController.h
++++ b/cocos/base/CCController.h
+@@ -25,7 +25,7 @@
+ 
+ #ifndef __cocos2d_libs__CCController__
+ #define __cocos2d_libs__CCController__
+-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 )
++#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_PS4 )
+ 
+ #include "platform/CCPlatformMacros.h"
+ #include <string>
+@@ -221,7 +221,7 @@ private:
+     EventController *_keyEvent;
+     EventController *_axisEvent;
+ 
+-    #if ( CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 )
++    #if ( CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_PS4 )
+     //FIXME: Once GLFW 3.3 is bundled with cocos2d-x, remove these unordered
+     //maps. They won't be needed. We will only need to provide a mapping from
+     //the GLFW gamepad key codes to the Controller::Key.
 diff --git a/cocos/base/allocator/CCAllocatorMutex.h b/cocos/base/allocator/CCAllocatorMutex.h
 index 7b7b4d6..fd391d6 100644
 --- a/cocos/base/allocator/CCAllocatorMutex.h
@@ -199,10 +240,10 @@ index a90f921..746af91 100644
  
  #endif /* __PLATFORM_CCSTDC_H__*/
 diff --git a/cocos/platform/CMakeLists.txt b/cocos/platform/CMakeLists.txt
-index e577564..71f41c1 100644
+index e577564..60080d9 100644
 --- a/cocos/platform/CMakeLists.txt
 +++ b/cocos/platform/CMakeLists.txt
-@@ -109,6 +109,23 @@ elseif(APPLE)
+@@ -109,6 +109,24 @@ elseif(APPLE)
              )
      endif()
  
@@ -222,6 +263,7 @@ index e577564..71f41c1 100644
 +        platform/ps4/CCApplication-ps4.cpp
 +        platform/ps4/CCDevice-ps4.cpp
 +        platform/ps4/CCGLViewImpl-ps4.cpp
++        platform/ps4/CCController-ps4.cpp
 +    )
  elseif(LINUX)
  
