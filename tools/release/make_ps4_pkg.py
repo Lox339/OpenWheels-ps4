@@ -98,9 +98,21 @@ def generate_gp4(app_dir, output_gp4, content_id, passcode="00000000000000000000
     ET.SubElement(volume, "volume_id").text = "PS4VOLUME"
     ET.SubElement(volume, "volume_ts").text = "2026-11-05 00:00:00"
 
-    package = ET.SubElement(volume, "package", paramsfo="sce_sys/param.sfo")
-    ET.SubElement(package, "passcode").text = passcode
-    ET.SubElement(package, "content_id").text = content_id
+    ET.SubElement(
+        volume,
+        "package",
+        content_id=content_id,
+        passcode=passcode,
+        c_date="2026-11-05",
+        storage_type="digital50",
+        app_type="full",
+    )
+    chunk_info = ET.SubElement(volume, "chunk_info", chunk_count="1", scenario_count="1")
+    chunks = ET.SubElement(chunk_info, "chunks")
+    ET.SubElement(chunks, "chunk", id="0", layer_no="0", label="Chunk #0")
+    scenarios = ET.SubElement(chunk_info, "scenarios", default_id="0")
+    scenario = ET.SubElement(scenarios, "scenario", id="0", type="sp", initial_chunk_count="1", label="Scenario #0")
+    scenario.text = "0"
 
     files_elem = ET.SubElement(root, "files", img_no="0")
     rootdir_elem = ET.SubElement(root, "rootdir")
