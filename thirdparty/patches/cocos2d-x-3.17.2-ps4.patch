@@ -2,7 +2,13 @@ diff --git a/cmake/Modules/CocosConfigDefine.cmake b/cmake/Modules/CocosConfigDe
 index 4525083..c5cbe5c 100644
 --- a/cmake/Modules/CocosConfigDefine.cmake
 +++ b/cmake/Modules/CocosConfigDefine.cmake
-@@ -14,6 +14,9 @@
+@@ -9,9 +9,15 @@
+      set(PLATFORM_FOLDER win32)
+  elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+      set(PLATFORM_FOLDER android)
++     elseif(PS4)
++         set(PS4 TRUE)
++         set(PLATFORM_FOLDER ps4)
   elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
       if(ANDROID)
           set(PLATFORM_FOLDER android)
@@ -13,19 +19,22 @@ index 4525083..c5cbe5c 100644
           set(LINUX TRUE)
           set(PLATFORM_FOLDER linux)
 diff --git a/cmake/Modules/CocosConfigDepend.cmake b/cmake/Modules/CocosConfigDepend.cmake
-index 2850686..a9f0f97 100644
+index ff0983a..470021f 100644
 --- a/cmake/Modules/CocosConfigDepend.cmake
 +++ b/cmake/Modules/CocosConfigDepend.cmake
-@@ -5,6 +5,8 @@ macro(cocos2dx_depend)
+@@ -3,8 +3,10 @@ macro(cocos2dx_depend)
+     set(PLATFORM_SPECIFIC_LIBS)
  
      if(WINDOWS)
-         list(APPEND PLATFORM_SPECIFIC_LIBS ws2_32 userenv psapi winmm Version Iphlpapi opengl32)
 +    elseif(PS4)
 +        list(APPEND PLATFORM_SPECIFIC_LIBS kernel SceVideoOut SceUserService ScePad SceSysmodule SceNet SceNetCtl SceAudioOut ScePigletv2VSH)
-     elseif(LINUX)
+         list(APPEND PLATFORM_SPECIFIC_LIBS ws2_32 userenv psapi winmm Version Iphlpapi opengl32)
+-    elseif(LINUX)
++    elseif(LINUX AND NOT PS4)
          # need review those libs: X11 Xi Xrandr Xxf86vm Xinerama Xcursor rt m
          list(APPEND PLATFORM_SPECIFIC_LIBS dl X11 Xi Xrandr Xxf86vm Xinerama Xcursor rt m)
-@@ -93,7 +95,7 @@ macro(use_cocos2dx_libs_depend target)
+         # OpenWheels: OpenAL audio backend (cocos/audio/win32) instead of FMOD
+@@ -95,7 +97,7 @@ macro(use_cocos2dx_libs_depend target)
          target_link_libraries(${target} ${platform_lib})
      endforeach()
  
@@ -35,20 +44,26 @@ index 2850686..a9f0f97 100644
          cocos_use_pkg(${target} GTK3)
          cocos_use_pkg(${target} ZLIB)
 diff --git a/cocos/audio/AudioEngine.cpp b/cocos/audio/AudioEngine.cpp
-index f4f7d98..b304477 100644
+index 4e81f75..8ab12dc 100644
 --- a/cocos/audio/AudioEngine.cpp
 +++ b/cocos/audio/AudioEngine.cpp
-@@ -41,6 +41,8 @@
+@@ -37,10 +37,14 @@
+ #include "audio/apple/AudioEngine-inl.h"
+ #elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+ #include "audio/win32/AudioEngine-win32.h"
++#elif CC_TARGET_PLATFORM == CC_PLATFORM_PS4
++#include "audio/ps4/AudioEngine-ps4.h"
+ #elif CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
  #include "audio/winrt/AudioEngine-winrt.h"
  #elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
- #include "audio/linux/AudioEngine-linux.h"
+ #include "audio/win32/AudioEngine-win32.h"
 +#elif CC_TARGET_PLATFORM == CC_PLATFORM_PS4
 +#include "audio/ps4/AudioEngine-ps4.h"
  #elif CC_TARGET_PLATFORM == CC_PLATFORM_TIZEN
  #include "audio/tizen/AudioEngine-tizen.h"
  #endif
 diff --git a/cocos/audio/CMakeLists.txt b/cocos/audio/CMakeLists.txt
-index ae58b43..765a337 100644
+index f26faa9..d1c18cd 100644
 --- a/cocos/audio/CMakeLists.txt
 +++ b/cocos/audio/CMakeLists.txt
 @@ -109,6 +109,13 @@ elseif(ANDROID)
@@ -63,8 +78,8 @@ index ae58b43..765a337 100644
 +        audio/ps4/AudioEngine-ps4.cpp
 +    )
  elseif(LINUX)
+     # OpenWheels: the OpenAL backend of win32 (portable C++11 + OpenAL), as cocos2d-x 4 does.
      set(COCOS_AUDIO_PLATFORM_HEADER
-         audio/linux/AudioEngine-linux.h
 diff --git a/cocos/platform/CCGL.h b/cocos/platform/CCGL.h
 index 013fe09..4ecd639 100644
 --- a/cocos/platform/CCGL.h
