@@ -10,7 +10,7 @@ trap 'rm -rf "$WORKDIR"' EXIT
 echo "==> Cloning oosdk_libraries for source files..."
 git clone --depth 1 https://github.com/bucanero/oosdk_libraries.git "$WORKDIR/oosdk_libraries"
 
-PS4_CFLAGS="--target=x86_64-pc-freebsd12-elf -fPIC -O2 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -D__ORBIS__=1 -DPS4=1 -D__FreeBSD__=12 -D_DEFAULT_SOURCE -D_BSD_SOURCE"
+PS4_CFLAGS="--target=x86_64-pc-freebsd12-elf -fPIC -O2 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -D__ORBIS__=1 -DPS4=1 -D__FreeBSD__=12 -D_DEFAULT_SOURCE -D_BSD_SOURCE -DHAVE_UNISTD_H=1"
 
 AR_CMD="$(command -v llvm-ar 2>/dev/null || command -v llvm-ar-18 2>/dev/null || command -v ar)"
 echo "==> Using archiver: $AR_CMD"
@@ -21,7 +21,7 @@ echo "==> Compiling full zlib for PS4..."
     git clone --quiet --depth 1 --branch v1.2.13 https://github.com/madler/zlib.git "$WORKDIR/zlib"
     cd "$WORKDIR/zlib"
     # shellcheck disable=SC2086
-    clang $PS4_CFLAGS -c -I. ./*.c
+    clang $PS4_CFLAGS -DHAVE_UNISTD_H=1 -Wno-implicit-function-declaration -Wno-deprecated-non-prototype -c -I. ./*.c
     "$AR_CMD" rcs libz.a ./*.o
     cp -f zlib.h zconf.h "${OO_PS4_TOOLCHAIN}/include/"
     cp -f libz.a "${OO_PS4_TOOLCHAIN}/lib/"
@@ -34,7 +34,7 @@ echo "==> Compiling libpng for PS4..."
 (
     cd "$WORKDIR/oosdk_libraries/libpng"
     # shellcheck disable=SC2086
-    clang $PS4_CFLAGS -c -Iinclude source/*.c
+    clang $PS4_CFLAGS -DHAVE_UNISTD_H=1 -Wno-implicit-function-declaration -Wno-deprecated-non-prototype -c -Iinclude source/*.c
     "$AR_CMD" rcs libpng.a ./*.o
     cp -f include/*.h "${OO_PS4_TOOLCHAIN}/include/"
     cp -f libpng.a "${OO_PS4_TOOLCHAIN}/lib/"
@@ -45,7 +45,7 @@ echo "==> Compiling polarssl for PS4..."
 (
     cd "$WORKDIR/oosdk_libraries/polarssl-1.3.9"
     # shellcheck disable=SC2086
-    clang $PS4_CFLAGS -c -Iinclude library/*.c
+    clang $PS4_CFLAGS -DHAVE_UNISTD_H=1 -Wno-implicit-function-declaration -Wno-deprecated-non-prototype -c -Iinclude library/*.c
     "$AR_CMD" rcs libpolarssl.a ./*.o
     cp -r include/polarssl "${OO_PS4_TOOLCHAIN}/include/"
     cp -f libpolarssl.a "${OO_PS4_TOOLCHAIN}/lib/"
