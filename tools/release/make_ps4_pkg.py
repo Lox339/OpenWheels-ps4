@@ -216,7 +216,17 @@ def main():
 
         cmd = []
         if sys.platform != "win32" and pub_cmd.endswith(".exe"):
-            wine_bin = shutil.which("wine64") or shutil.which("wine") or "wine"
+            candidates = [
+                shutil.which("wine"),
+                shutil.which("wine64"),
+                "/usr/local/bin/wine",
+                "/usr/local/bin/wine64",
+                "/usr/bin/wine",
+                "/usr/bin/wine64",
+                "/usr/lib/wine/wine64",
+                "/usr/lib/wine/wine",
+            ]
+            wine_bin = next((c for c in candidates if c and os.path.exists(c)), "wine")
             cmd = [wine_bin, pub_cmd, "img_create", "--oformat", "pkg", "--skip_digest", gp4_path, out_dir]
         else:
             cmd = [pub_cmd, "img_create", "--oformat", "pkg", "--skip_digest", gp4_path, out_dir]
