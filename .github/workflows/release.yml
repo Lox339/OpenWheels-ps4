@@ -81,6 +81,17 @@ jobs:
                 break
               fi
             done
+            if [ ! -f dl/package.zip ]; then
+              echo "Checking upstream officialmelon/OpenWheels for releases..."
+              upstream_tags="$(gh release list -R "officialmelon/OpenWheels" --limit 10 --json tagName -q '.[].tagName' 2>/dev/null || true)"
+              for tag in ${upstream_tags}; do
+                if gh release download "${tag}" -R "officialmelon/OpenWheels" -p OpenWheels-windows.zip -D dl --clobber; then
+                  echo "game data from upstream release ${tag}"
+                  mv dl/OpenWheels-windows.zip dl/package.zip
+                  break
+                fi
+              done
+            fi
             [ -f dl/package.zip ] || { echo "::error::no release with OpenWheels-windows.zip found"; exit 1; }
           fi
           python3 tools/release/extract_game_data.py dl/package.zip game-data
