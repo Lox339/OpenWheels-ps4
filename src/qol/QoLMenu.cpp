@@ -89,6 +89,8 @@ std::string QoLMenu::labelFor(int row) const
     case RowRegrabVehicle: return std::string("re-grab vehicle: ") + onOff(qol::regrabVehicleSetting());
     case RowAnyCharacter: return std::string("any character: ") + onOff(qol::anyCharacterOnForcedLevels());
     case RowBrowserPhysics: return std::string("browser physics (online levels): ") + onOff(online::browserPhysicsOption());
+    case RowPhysicsPrecision: return std::string("physics precision: ") + qol::physicsPrecisionName(qol::physicsPrecision());
+    case RowSmoothInterp: return std::string("motion smoothing: ") + onOff(qol::smoothPhysicsInterpolation());
     default: return std::string();
     }
 }
@@ -105,7 +107,8 @@ void QoLMenu::addContent()
     const Size visibleSize = Director::getInstance()->getVisibleSize();
 
     Menu* visuals = Menu::create(makeRow(RowBlood), makeRow(RowParticles), makeRow(RowCamera),
-                                 makeRow(RowTextures), makeRow(RowFrameRate), makeRow(RowFps), nullptr);
+                                 makeRow(RowTextures), makeRow(RowFrameRate), makeRow(RowFps),
+                                 makeRow(RowSmoothInterp), nullptr);
     Menu* game = Menu::create();
     game->addChild(QoLSliderItem::create([](float v) { return "sound effects: " + percent(v); }, qol::effectsVolume,
                                          qol::setEffectsVolume));
@@ -114,6 +117,7 @@ void QoLMenu::addContent()
     game->addChild(makeRow(RowUnlockLevels));
     game->addChild(makeRow(RowAnyCharacter));  // user / online levels that force a character
     game->addChild(makeRow(RowBrowserPhysics));  // the next browser level steps at 1/30 (FlashPhysics.h)
+    game->addChild(makeRow(RowPhysicsPrecision));
     game->addChild(makeRow(RowChildGore));
     game->addChild(makeRow(RowRegrabVehicle));
     if (qol::fullscreenSupported())
@@ -209,6 +213,12 @@ void QoLMenu::rowPressed(Ref* sender)
         break;
     case RowBrowserPhysics:
         online::setBrowserPhysicsOption(!online::browserPhysicsOption());
+        break;
+    case RowPhysicsPrecision:
+        qol::setPhysicsPrecision((qol::PhysicsPrecision)(((int)qol::physicsPrecision() + 1) % 3));
+        break;
+    case RowSmoothInterp:
+        qol::setSmoothPhysicsInterpolation(!qol::smoothPhysicsInterpolation());
         break;
     case RowChildGore:
         if (!qol::childGoreAvailable())

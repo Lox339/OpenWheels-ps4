@@ -33,6 +33,8 @@ private:
         RowTouchControls,
         RowAnyCharacter,   // qol/CharacterChoice.h
         RowBrowserPhysics, // online/FlashPhysics.h
+        RowPhysicsPrecision,
+        RowSmoothInterp,
         RowRegrabVehicle,  // QoL.h regrabVehicle
         RowController,     // PAD (PC addition): qol/QoLPadMenu.h
     };

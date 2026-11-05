@@ -133,6 +133,23 @@ void setRegrabVehicle(bool on);
 // --dump-world verification: the original's behaviour for this run, whatever the setting.
 void suspendRegrabVehicle(bool suspended);
 
+// Physics precision / solver iterations:
+//   Original - 8 velocity, 3 position iterations (mobile 1:1 parity)
+//   High     - 16 velocity, 8 position iterations, tighter joint & contact tolerance
+//   Ultra    - 24 velocity, 16 position iterations, maximum ragdoll stability & anti-tunneling
+enum class PhysicsPrecision { Original = 0, High = 1, Ultra = 2 };
+PhysicsPrecision physicsPrecision();
+PhysicsPrecision physicsPrecisionSetting();
+void setPhysicsPrecision(PhysicsPrecision precision);
+const char* physicsPrecisionName(PhysicsPrecision precision);
+void physicsIterations(int* velocityIterations, int* positionIterations);
+int physicsMaxSubSteps();
+void suspendPhysicsPrecision(bool suspended);
+
+// Universal smooth render interpolation for 60Hz+ displays across all levels (campaign & online)
+bool smoothPhysicsInterpolation();
+void setSmoothPhysicsInterpolation(bool on);
+
 // Applies display options (FPS counter, fullscreen) - call once the GL view exists.
 void applyDisplaySettings();
 

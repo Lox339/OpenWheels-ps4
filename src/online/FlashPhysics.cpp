@@ -15,6 +15,7 @@
 #include "Session.h"
 #include "online/FlashRuntime.h"
 #include "online/RenderInterpolation.h"
+#include "qol/QoL.h"
 
 // Box2D 2.3.1's switch for the 2-point block solver (b2ContactSolver.cpp, not in its headers).
 extern bool g_blockSolve;
@@ -192,7 +193,9 @@ std::function<void()> g_afterWorldStep;
 void flashWorldStep(b2World* world, float timeStep)
 {
     if (!browserPhysics()) {
-        world->Step(timeStep, 8, 3);
+        int velIter = 8, posIter = 3;
+        qol::physicsIterations(&velIter, &posIter);
+        world->Step(timeStep, velIter, posIter);
         return;
     }
     const bool blockSolve = g_blockSolve;

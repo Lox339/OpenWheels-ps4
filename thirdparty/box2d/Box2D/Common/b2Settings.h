@@ -87,11 +87,11 @@ typedef double float64;
 // Dynamics
 
 /// Maximum number of contacts to be handled to solve a TOI impact.
-#define b2_maxTOIContacts			32
+#define b2_maxTOIContacts			64
 
 /// A velocity threshold for elastic collisions. Any collision with a relative linear
 /// velocity below this threshold will be treated as inelastic.
-#define b2_velocityThreshold		1.0f
+#define b2_velocityThreshold		0.5f
 
 /// The maximum linear position correction used when solving constraints. This helps to
 /// prevent overshoot.

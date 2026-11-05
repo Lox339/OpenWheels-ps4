@@ -9,6 +9,7 @@
 #include "2d/CCNode.h"
 #include "LevelItem.h"
 #include "online/FlashPhysics.h"
+#include "qol/QoL.h"
 
 namespace online {
 namespace interp {
@@ -49,7 +50,7 @@ bool teleported(const b2Body* body, const Pose& previous, float step)
 
 }  // namespace
 
-bool enabled() { return browserPhysics(); }
+bool enabled() { return browserPhysics() || qol::smoothPhysicsInterpolation(); }
 
 void reset()
 {

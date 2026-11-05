@@ -534,36 +534,56 @@ void Session::update(float dt)
         }
         return;
     }
-    _timeAccumulator -= timeStep;
 
-    if (interpolate)
+    const int maxSubSteps = qol::physicsMaxSubSteps();
+    const float maxAccumulator = timeStep * (float)maxSubSteps;
+    if (_timeAccumulator > maxAccumulator)
     {
-        online::interp::beforeStep(_world, this);
+        _timeAccumulator = maxAccumulator;
     }
-    if (online::flashLevel())
+
+    int velIter = 8, posIter = 3;
+    qol::physicsIterations(&velIter, &posIter);
+
+    int stepsTaken = 0;
+    while (_timeAccumulator >= timeStep && stepsTaken < maxSubSteps)
     {
-        online::replays::physicsStep();  // ONLINE (PC addition): browser replays, per world step
-        online::flashPreStep(_world);  // ONLINE (PC addition): Flash Box2D 2.0 contact rules
+        _timeAccumulator -= timeStep;
+        ++stepsTaken;
+
+        if (interpolate)
+        {
+            online::interp::beforeStep(_world, this);
+        }
+        if (online::flashLevel())
+        {
+            online::replays::physicsStep();  // ONLINE (PC addition): browser replays, per world step
+            online::flashPreStep(_world);  // ONLINE (PC addition): Flash Box2D 2.0 contact rules
+        }
+        if (online::browserPhysics() && _level != nullptr)
+        {
+            _level->onlinePoseBeforeStep();  // ONLINE (PC addition): see LevelB2D.h
+        }
+        if (online::flashLevel())
+        {
+            online::flashWorldStep(_world, timeStep);  // ONLINE (PC addition): browser profile, FlashPhysics.h
+        }
+        else
+        {
+            _world->Step(timeStep, velIter, posIter);
+        }
+        if (online::flashLevel())
+        {
+            online::flashPostStep(_world);  // ONLINE (PC addition)
+        }
+        if (_level != nullptr)
+        {
+            _level->update(timeStep);
+        }
     }
-    if (online::browserPhysics() && _level != nullptr)
-    {
-        _level->onlinePoseBeforeStep();  // ONLINE (PC addition): see LevelB2D.h
-    }
-    if (online::flashLevel())
-    {
-        online::flashWorldStep(_world, timeStep);  // ONLINE (PC addition): browser profile, FlashPhysics.h
-    }
-    else
-    {
-        _world->Step(timeStep, 8, 3);
-    }
-    if (online::flashLevel())
-    {
-        online::flashPostStep(_world);  // ONLINE (PC addition)
-    }
+
     if (_level != nullptr)
     {
-        _level->update(timeStep);
         _level->paint();
     }
     _shapesNode->updateVerts();

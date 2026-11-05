@@ -29,6 +29,8 @@ const char* const kRegrabVehicle = "qol_regrab_vehicle";
 const char* const kRumble = "qol_pad_rumble";
 const char* const kTiltSteering = "qol_tilt_steering";
 const char* const kPhoneVibration = "qol_phone_vibration";
+const char* const kPhysicsPrecision = "qol_physics_precision";
+const char* const kSmoothInterp = "qol_smooth_interp";
 
 bool g_keyboardTouch = false;
 bool g_regrabSuspended = false;
@@ -36,6 +38,9 @@ int g_regrab = -1;  // cached: UserDefault reads its file on every get on deskto
 int g_rumble = -1;  // cached (read on every rumble)
 int g_tilt = -1;    // cached (read every frame)
 int g_phoneVibration = -1;
+int g_physicsPrecision = -1;
+bool g_physicsPrecisionSuspended = false;
+int g_smoothInterp = -1;
 
 std::function<void(bool)>& fullscreenHandler() {
     static std::function<void(bool)> handler;
@@ -278,6 +283,73 @@ void setRegrabVehicle(bool on) {
     g_regrab = on ? 1 : 0;
 }
 void suspendRegrabVehicle(bool suspended) { g_regrabSuspended = suspended; }
+
+PhysicsPrecision physicsPrecisionSetting() {
+    if (g_physicsPrecision < 0) {
+        g_physicsPrecision = std::max(0, std::min(2, store()->getIntegerForKey(kPhysicsPrecision, 1)));
+    }
+    return (PhysicsPrecision)g_physicsPrecision;
+}
+
+PhysicsPrecision physicsPrecision() {
+    if (g_physicsPrecisionSuspended) return PhysicsPrecision::Original;
+    return physicsPrecisionSetting();
+}
+
+void setPhysicsPrecision(PhysicsPrecision precision) {
+    g_physicsPrecision = (int)precision;
+    store()->setIntegerForKey(kPhysicsPrecision, g_physicsPrecision);
+}
+
+const char* physicsPrecisionName(PhysicsPrecision precision) {
+    switch (precision) {
+        case PhysicsPrecision::Original: return "original (8 / 3)";
+        case PhysicsPrecision::Ultra:    return "ultra (24 / 16)";
+        default:                         return "high (16 / 8)";
+    }
+}
+
+void physicsIterations(int* velocityIterations, int* positionIterations) {
+    switch (physicsPrecision()) {
+        case PhysicsPrecision::Ultra:
+            if (velocityIterations) *velocityIterations = 24;
+            if (positionIterations) *positionIterations = 16;
+            break;
+        case PhysicsPrecision::High:
+            if (velocityIterations) *velocityIterations = 16;
+            if (positionIterations) *positionIterations = 8;
+            break;
+        case PhysicsPrecision::Original:
+        default:
+            if (velocityIterations) *velocityIterations = 8;
+            if (positionIterations) *positionIterations = 3;
+            break;
+    }
+}
+
+int physicsMaxSubSteps() {
+    switch (physicsPrecision()) {
+        case PhysicsPrecision::Ultra: return 4;
+        case PhysicsPrecision::High:  return 2;
+        default:                      return 1;
+    }
+}
+
+void suspendPhysicsPrecision(bool suspended) {
+    g_physicsPrecisionSuspended = suspended;
+}
+
+bool smoothPhysicsInterpolation() {
+    if (g_smoothInterp < 0) {
+        g_smoothInterp = store()->getBoolForKey(kSmoothInterp, true) ? 1 : 0;
+    }
+    return g_smoothInterp == 1;
+}
+
+void setSmoothPhysicsInterpolation(bool on) {
+    g_smoothInterp = on ? 1 : 0;
+    store()->setBoolForKey(kSmoothInterp, on);
+}
 
 void setKeyboardTouch(bool on) { g_keyboardTouch = on; }
 bool keyboardTouch() { return g_keyboardTouch; }
