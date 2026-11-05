@@ -10,13 +10,15 @@ trap 'rm -rf "$WORKDIR"' EXIT
 echo "==> Cloning oosdk_libraries for source files..."
 git clone --depth 1 https://github.com/bucanero/oosdk_libraries.git "$WORKDIR/oosdk_libraries"
 
+PS4_CFLAGS="--target=x86_64-pc-freebsd12-elf -fPIC -O2 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -D__ORBIS__=1 -DPS4=1 -D__FreeBSD__=12 -D_DEFAULT_SOURCE -D_BSD_SOURCE"
+
 # 1. Build zlib
 echo "==> Compiling zlib for PS4..."
 (
     cd "$WORKDIR/oosdk_libraries/zlib_partial"
-    clang --target=x86_64-pc-freebsd12-elf -fPIC -O2 -c \
-      -isysroot "${OO_PS4_TOOLCHAIN}" -Iinclude source/*.c
-    llvm-ar rcs libz.a *.o
+    # shellcheck disable=SC2086
+    clang $PS4_CFLAGS -c -Iinclude source/*.c
+    llvm-ar rcs libz.a ./*.o
     cp -f include/zlib.h include/zconf.h "${OO_PS4_TOOLCHAIN}/include/"
     cp -f libz.a "${OO_PS4_TOOLCHAIN}/lib/"
 )
@@ -25,9 +27,9 @@ echo "==> Compiling zlib for PS4..."
 echo "==> Compiling libpng for PS4..."
 (
     cd "$WORKDIR/oosdk_libraries/libpng"
-    clang --target=x86_64-pc-freebsd12-elf -fPIC -O2 -c \
-      -isysroot "${OO_PS4_TOOLCHAIN}" -Iinclude -I"${OO_PS4_TOOLCHAIN}/include" source/*.c
-    llvm-ar rcs libpng.a *.o
+    # shellcheck disable=SC2086
+    clang $PS4_CFLAGS -c -Iinclude source/*.c
+    llvm-ar rcs libpng.a ./*.o
     cp -f include/*.h "${OO_PS4_TOOLCHAIN}/include/"
     cp -f libpng.a "${OO_PS4_TOOLCHAIN}/lib/"
 )
