@@ -9,7 +9,7 @@
 #include <string>
 
 #include "cocos2d.h"
-#include "AppDelegate.h"
+#include "game/app/AppDelegate.h"
 
 #if defined(__ORBIS__) || defined(PS4) || defined(__PS4__)
 #if __has_include(<kernel.h>)

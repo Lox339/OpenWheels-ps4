@@ -93,6 +93,15 @@ if [ -e "$engine" ]; then
     fi
 fi
 [ -e "$engine" ] || install_engine
+
+if [ -d "$thirdparty/ps4/platform" ]; then
+    step "copying PS4 platform support into engine"
+    mkdir -p "$engine/cocos/platform/ps4"
+    cp -r "$thirdparty/ps4/platform/"* "$engine/cocos/platform/ps4/"
+    mkdir -p "$engine/cocos/audio/ps4"
+    cp -r "$thirdparty/ps4/audio/"* "$engine/cocos/audio/ps4/"
+fi
+
 install_patches
 
 if [ ! -f "$engine/cocos/cocos2d.h" ] || [ ! -d "$engine/external/Box2D/prebuilt" ]; then
