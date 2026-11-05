@@ -109,7 +109,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends clang lld cmake ninja-build wine64 python3 unar
+          sudo apt-get install -y -qq --no-install-recommends clang lld llvm cmake ninja-build wine64 python3 unar
           if [ ! -f /usr/local/bin/wine ] && [ -f /usr/bin/wine64 ]; then
             sudo ln -sf /usr/bin/wine64 /usr/local/bin/wine
           fi
