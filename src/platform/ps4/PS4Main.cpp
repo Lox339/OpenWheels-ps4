@@ -40,6 +40,11 @@
 #endif
 
 extern "C" {
+int sceSysmoduleLoadModule(uint16_t);
+int sceSysmoduleUnloadModule(uint16_t);
+int sceNetInit(void);
+int sceNetPoolCreate(const char*, int, int);
+
 #if !defined(__ORBIS__) && !defined(PS4) && !defined(__PS4__)
 __attribute__((weak)) int sceSysmoduleLoadModule(uint16_t) { return 0; }
 __attribute__((weak)) int sceSysmoduleUnloadModule(uint16_t) { return 0; }
