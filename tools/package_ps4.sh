@@ -94,10 +94,21 @@ fi
 cp "$repo/LICENSE" "$repo/NOTICE.md" "$staging/"
 
 icon=""
-if [ -f "$repo/res/ps4/icon0.png" ]; then
+if [ -f "$repo/res/ps4/icon0_source.jpg" ]; then
+    icon="$repo/res/ps4/icon0_source.jpg"
+elif [ -f "$repo/res/ps4/icon0.png" ]; then
     icon="$repo/res/ps4/icon0.png"
 elif [ -f "$repo/docs/screenshots/main-menu.png" ]; then
     icon="$repo/docs/screenshots/main-menu.png"
+fi
+
+bg=""
+if [ -f "$repo/res/ps4/pic1_source.jpg" ]; then
+    bg="$repo/res/ps4/pic1_source.jpg"
+elif [ -f "$repo/res/ps4/pic1.png" ]; then
+    bg="$repo/res/ps4/pic1.png"
+elif [ -f "$repo/docs/screenshots/campaign.png" ]; then
+    bg="$repo/docs/screenshots/campaign.png"
 fi
 
 mkdir -p "$out"
@@ -105,6 +116,7 @@ python3 "$repo/tools/release/make_ps4_pkg.py" \
     --app-dir "$staging" \
     --out "$out/OpenWheels-ps4.pkg" \
     --tools-dir "$tools_dir" \
-    ${icon:+--icon "$icon"}
+    ${icon:+--icon "$icon"} \
+    ${bg:+--bg "$bg"}
 
 echo "==> PS4 packaging finished successfully: $out/OpenWheels-ps4.pkg"

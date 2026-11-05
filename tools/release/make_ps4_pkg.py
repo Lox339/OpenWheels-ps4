@@ -2,7 +2,8 @@
 """
 PS4 Fake PKG Builder for OpenWheels.
 Uses CyB1K / Orbis Publishing Tools (orbis-pub-cmd.exe via Wine on Linux).
-Generates param.sfo, project.gp4, and creates OpenWheels-ps4.pkg.
+Generates official-compliant param.sfo, project.gp4, icon0.png, pic0.png, pic1.png,
+and creates OpenWheels-ps4.pkg.
 """
 
 import argparse
@@ -14,8 +15,27 @@ import sys
 import xml.etree.ElementTree as ET
 
 
+SFO_STANDARD_MAX_LENS = {
+    "APP_TYPE": 4,
+    "APP_VER": 8,
+    "ATTRIBUTE": 4,
+    "CATEGORY": 4,
+    "CONTENT_ID": 48,
+    "DOWNLOAD_DATA_SIZE": 4,
+    "FORMAT": 4,
+    "SYSTEM_VER": 4,
+    "TITLE": 128,
+    "TITLE_ID": 12,
+    "VERSION": 8,
+}
+
+
 def build_param_sfo(entries):
-    """Generates a binary Sony Param.SFO file from key-value pairs."""
+    """
+    Generates an official Sony PARAM.SFO byte-for-byte matching Sony Orbis SDK standards.
+    Fixes SCE_APP_INSTALLER_ERROR_CONTENT_ID_DISAGREE (CE-34629-4) by ensuring
+    exact standard max_len allocations (CONTENT_ID: 48, TITLE_ID: 12, TITLE: 128).
+    """
     sorted_entries = sorted(entries.items(), key=lambda x: x[0])
     num_entries = len(sorted_entries)
 
@@ -36,15 +56,17 @@ def build_param_sfo(entries):
 
         if isinstance(val, int):
             fmt = 0x0404  # uint32 integer
-            raw = struct.pack("<I", val)
-            max_len = 4
+            max_len = SFO_STANDARD_MAX_LENS.get(key, 4)
             data_len = 4
+            raw = struct.pack("<I", val).ljust(max_len, b"\x00")
         elif isinstance(val, str):
-            fmt = 0x0204  # null-terminated string
-            raw = val.encode("utf-8") + b"\x00"
-            max_len = (len(raw) + 7) & ~7
-            data_len = len(raw)
-            raw = raw.ljust(max_len, b"\x00")
+            fmt = 0x0204  # null-terminated UTF-8 string
+            raw_str = val.encode("utf-8") + b"\x00"
+            data_len = len(raw_str)
+            max_len = SFO_STANDARD_MAX_LENS.get(key, (data_len + 7) & ~7)
+            if data_len > max_len:
+                max_len = (data_len + 7) & ~7
+            raw = raw_str.ljust(max_len, b"\x00")
         else:
             raise TypeError(f"Unsupported SFO type: {type(val)}")
 
@@ -62,10 +84,9 @@ def build_param_sfo(entries):
 
 
 def create_blank_png(path, width=512, height=512):
-    """Creates a minimal valid 512x512 RGBA PNG file if none exists."""
+    """Creates a minimal valid RGBA PNG file if none exists."""
     import zlib
     raw_data = bytearray()
-    # Gradient blue/orange icon
     for y in range(height):
         raw_data.append(0)  # filter type 0 (None)
         for x in range(width):
@@ -88,6 +109,43 @@ def create_blank_png(path, width=512, height=512):
 
     with open(path, "wb") as f:
         f.write(png)
+
+
+def resize_image_to_png(src_path, dst_path, width, height):
+    """Resizes and converts any image (JPG/PNG) to exact width x height PNG."""
+    try:
+        from PIL import Image
+        with Image.open(src_path) as im:
+            im = im.convert("RGBA")
+            resample = getattr(Image, "Resampling", Image).LANCZOS
+            resized = im.resize((width, height), resample)
+            resized.save(dst_path, format="PNG", optimize=True)
+            print(f"Resized {src_path} -> {dst_path} ({width}x{height})")
+            return True
+    except Exception as e:
+        print(f"PIL resize failed ({e}), attempting ffmpeg fallback...")
+
+    # Fallback to ffmpeg if available
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg:
+        try:
+            subprocess.check_call(
+                [ffmpeg, "-y", "-i", src_path, "-vf", f"scale={width}:{height}", dst_path],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            print(f"ffmpeg resized {src_path} -> {dst_path} ({width}x{height})")
+            return True
+        except Exception as e:
+            print(f"ffmpeg resize failed: {e}")
+
+    # Fallback: copy directly if it's already a PNG
+    if src_path.lower().endswith(".png"):
+        shutil.copyfile(src_path, dst_path)
+        print(f"Copied PNG {src_path} -> {dst_path}")
+        return True
+
+    return False
 
 
 def generate_gp4(app_dir, output_gp4, content_id, passcode="00000000000000000000000000000000"):
@@ -162,16 +220,17 @@ def main():
     parser.add_argument("--out", required=True, help="Output .pkg file destination")
     parser.add_argument("--tools-dir", default=None, help="Path to CyB1K PS4-Fake-PKG-Tools directory")
     parser.add_argument("--title-id", default="CUSA33900", help="Title ID (e.g. CUSA33900)")
-    parser.add_argument("--content-id", default="IV0000-CUSA33900_00-OPENWHEELS000000", help="Content ID")
+    parser.add_argument("--content-id", default="UP0001-CUSA33900_00-OPENWHEELS000000", help="Content ID")
     parser.add_argument("--passcode", default="00000000000000000000000000000000", help="PKG Passcode (32 zeros)")
-    parser.add_argument("--icon", default=None, help="Custom 512x512 icon0.png")
+    parser.add_argument("--icon", default=None, help="Custom 512x512 icon0 source")
+    parser.add_argument("--bg", default=None, help="Custom 1920x1080 pic1/pic0 background source")
     args = parser.parse_args()
 
     app_dir = os.path.abspath(args.app_dir)
     sce_sys = os.path.join(app_dir, "sce_sys")
     os.makedirs(sce_sys, exist_ok=True)
 
-    # 1. Create param.sfo
+    # 1. Create param.sfo with strict Sony standards
     sfo_path = os.path.join(sce_sys, "param.sfo")
     sfo_data = build_param_sfo({
         "APP_TYPE": 1,
@@ -181,7 +240,7 @@ def main():
         "CONTENT_ID": args.content_id,
         "DOWNLOAD_DATA_SIZE": 0,
         "FORMAT": "obs",
-        "SYSTEM_VER": 0x05050000,
+        "SYSTEM_VER": 0,
         "TITLE": "OpenWheels",
         "TITLE_ID": args.title_id,
         "VERSION": "01.00",
@@ -190,20 +249,28 @@ def main():
         f.write(sfo_data)
     print(f"Created: {sfo_path}")
 
-    # 2. Create icon0.png
+    # 2. Setup icon0.png (512x512)
     icon_dst = os.path.join(sce_sys, "icon0.png")
+    icon_ready = False
     if args.icon and os.path.isfile(args.icon):
-        shutil.copyfile(args.icon, icon_dst)
-        print(f"Copied icon from {args.icon}")
-    elif not os.path.isfile(icon_dst):
-        create_blank_png(icon_dst)
+        icon_ready = resize_image_to_png(args.icon, icon_dst, 512, 512)
+    if not icon_ready and not os.path.isfile(icon_dst):
+        create_blank_png(icon_dst, 512, 512)
         print(f"Created default 512x512 icon: {icon_dst}")
 
-    # 3. Generate project.gp4
+    # 3. Setup pic1.png (1920x1080) and pic0.png (1920x1080)
+    pic1_dst = os.path.join(sce_sys, "pic1.png")
+    pic0_dst = os.path.join(sce_sys, "pic0.png")
+    if args.bg and os.path.isfile(args.bg):
+        if resize_image_to_png(args.bg, pic1_dst, 1920, 1080):
+            shutil.copyfile(pic1_dst, pic0_dst)
+            print(f"Created PS4 cover background: {pic1_dst} and {pic0_dst}")
+
+    # 4. Generate project.gp4
     gp4_path = os.path.join(app_dir, "project.gp4")
     generate_gp4(app_dir, gp4_path, args.content_id, args.passcode)
 
-    # 4. Locate orbis-pub-cmd
+    # 5. Locate orbis-pub-cmd
     pub_cmd = None
     if args.tools_dir and os.path.isdir(args.tools_dir):
         for root, _, files in os.walk(args.tools_dir):
@@ -215,7 +282,6 @@ def main():
                 break
 
     if not pub_cmd:
-        # Search PATH
         pub_cmd = shutil.which("orbis-pub-cmd.exe") or shutil.which("orbis-pub-cmd")
 
     out_pkg = os.path.abspath(args.out)
