@@ -73,6 +73,33 @@ index f26faa9..d1c18cd 100644
  elseif(LINUX)
      # OpenWheels: the OpenAL backend of win32 (portable C++11 + OpenAL), as cocos2d-x 4 does.
      set(COCOS_AUDIO_PLATFORM_HEADER
+diff --git a/cocos/base/CCConsole.cpp b/cocos/base/CCConsole.cpp
+index d26f02b..54c2cfb 100644
+--- a/cocos/base/CCConsole.cpp
++++ b/cocos/base/CCConsole.cpp
+@@ -57,6 +57,9 @@
+ #include <sys/socket.h>
+ #include <sys/un.h>
+ #include <sys/ioctl.h>
++#if defined(__FreeBSD__) || defined(__ORBIS__) || defined(PS4) || defined(__PS4__)
++#include <sys/filio.h>
++#endif
+ #endif
+ 
+ #include "base/CCDirector.h"
+diff --git a/cocos/base/allocator/CCAllocatorMutex.h b/cocos/base/allocator/CCAllocatorMutex.h
+index 7b7b4d6..fd391d6 100644
+--- a/cocos/base/allocator/CCAllocatorMutex.h
++++ b/cocos/base/allocator/CCAllocatorMutex.h
+@@ -30,7 +30,7 @@
+ 
+ #include "platform/CCPlatformMacros.h"
+ 
+-#if CC_TARGET_PLATFORM == CC_PLATFORM_TIZEN || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
++#if CC_TARGET_PLATFORM == CC_PLATFORM_TIZEN || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_PS4
+ #include "pthread.h"
+ #define MUTEX pthread_mutex_t
+ #define MUTEX_INIT(m) \
 diff --git a/cocos/cocos2d.h b/cocos/cocos2d.h
 index f10912b..6e09cce 100644
 --- a/cocos/cocos2d.h
