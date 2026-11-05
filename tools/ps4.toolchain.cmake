@@ -23,14 +23,21 @@ if(PS4_RANLIB)
     set(CMAKE_RANLIB "${PS4_RANLIB}" CACHE FILEPATH "Ranlib")
 endif()
 
+find_program(PS4_LINKER NAMES ld.lld ld.lld-18 ld)
+if(NOT PS4_LINKER)
+    set(PS4_LINKER "ld.lld")
+endif()
+
 set(TRIPLE "x86_64-pc-freebsd12-elf")
 
 set(PS4_DEFS "-D__ORBIS__=1 -DPS4=1 -D__FreeBSD__=12 -D__FreeBSD_version=1200000 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -D__BSD_VISIBLE=1 -D_DEFAULT_SOURCE -D_BSD_SOURCE")
 
 set(CMAKE_C_FLAGS_INIT "--target=${TRIPLE} -fPIC -funwind-tables -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include ${PS4_DEFS}")
 set(CMAKE_CXX_FLAGS_INIT "--target=${TRIPLE} -fPIC -funwind-tables -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include/c++/v1 -isystem ${OO_PS4_TOOLCHAIN}/include ${PS4_DEFS}")
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld -Wl,-m,elf_x86_64 -Wl,-pie -Wl,--script=${OO_PS4_TOOLCHAIN}/link.x -Wl,--eh-frame-hdr -L${OO_PS4_TOOLCHAIN}/lib ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
-set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld -Wl,-m,elf_x86_64 -shared -L${OO_PS4_TOOLCHAIN}/lib")
+
+set(_PS4_LINK "\"${PS4_LINKER}\" -m elf_x86_64 -pie --script \"${OO_PS4_TOOLCHAIN}/link.x\" --eh-frame-hdr -o <TARGET> \"${OO_PS4_TOOLCHAIN}/lib/crt1.o\" <OBJECTS> <LINK_FLAGS> -L\"${OO_PS4_TOOLCHAIN}/lib\" --start-group <LINK_LIBRARIES> -lc -lkernel -lc++ --end-group")
+set(CMAKE_C_LINK_EXECUTABLE "${_PS4_LINK}")
+set(CMAKE_CXX_LINK_EXECUTABLE "${_PS4_LINK}")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

@@ -32,22 +32,31 @@ done
 
 bin=""
 for cand in "$build_dir/bin/OpenWheels" "$build_dir/bin" "$build_dir"; do
-    if [ -f "$cand/eboot.bin" ] || [ -f "$cand/OpenWheels" ]; then
+    if [ -f "$cand/eboot.bin" ] || [ -f "$cand/OpenWheels" ] || [ -f "$cand/OpenWheels.elf" ]; then
         bin="$cand"
         break
     fi
 done
 [ -n "$bin" ] || bin="$build_dir/bin/OpenWheels"
 
-if [ ! -f "$bin/eboot.bin" ] && [ -f "$bin/OpenWheels" ]; then
-    echo "Creating eboot.bin from $bin/OpenWheels..."
+target_elf=""
+if [ -f "$bin/OpenWheels.elf" ]; then
+    target_elf="$bin/OpenWheels.elf"
+elif [ -f "$bin/OpenWheels" ]; then
+    target_elf="$bin/OpenWheels"
+fi
+
+if [ ! -f "$bin/eboot.bin" ] && [ -n "$target_elf" ]; then
+    echo "Creating eboot.bin from $target_elf..."
     if command -v create-eboot >/dev/null 2>&1; then
-        create-eboot "$bin/OpenWheels" "$bin/eboot.bin"
+        create-eboot "$target_elf" "$bin/eboot.bin"
     elif [ -n "${OO_PS4_TOOLCHAIN:-}" ] && [ -x "$OO_PS4_TOOLCHAIN/bin/linux/create-eboot" ]; then
-        "$OO_PS4_TOOLCHAIN/bin/linux/create-eboot" "$bin/OpenWheels" "$bin/eboot.bin"
+        "$OO_PS4_TOOLCHAIN/bin/linux/create-eboot" "$target_elf" "$bin/eboot.bin"
+    elif [ -n "${OO_PS4_TOOLCHAIN:-}" ] && [ -x "$OO_PS4_TOOLCHAIN/bin/linux/create-fself" ]; then
+        "$OO_PS4_TOOLCHAIN/bin/linux/create-fself" -in="$target_elf" -out="$bin/OpenWheels.oelf" --eboot "$bin/eboot.bin" --paid 0x3800000000000011
     else
         echo "Warning: create-eboot not found, using binary directly as eboot.bin"
-        cp "$bin/OpenWheels" "$bin/eboot.bin"
+        cp "$target_elf" "$bin/eboot.bin"
     fi
 fi
 
