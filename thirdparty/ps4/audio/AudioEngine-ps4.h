@@ -4,6 +4,8 @@
 #include "platform/CCPlatformConfig.h"
 #if CC_TARGET_PLATFORM == CC_PLATFORM_PS4
 
+#define MAX_AUDIOINSTANCES 32
+
 #include <string>
 #include <functional>
 
