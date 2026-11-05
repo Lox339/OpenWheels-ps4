@@ -92,7 +92,7 @@ def create_blank_png(path, width=512, height=512):
 
 def generate_gp4(app_dir, output_gp4, content_id, passcode="00000000000000000000000000000000"):
     """Generates an Orbis Pub Gen / Fake PKG Tools GP4 project file."""
-    root = ET.Element("pssproject", fmt="gp4")
+    root = ET.Element("psproject", fmt="gp4", version="1000")
     volume = ET.SubElement(root, "volume")
     ET.SubElement(volume, "volume_type").text = "pkg_ps4_app"
     ET.SubElement(volume, "volume_id").text = "PS4VOLUME"
@@ -102,7 +102,7 @@ def generate_gp4(app_dir, output_gp4, content_id, passcode="00000000000000000000
     ET.SubElement(package, "passcode").text = passcode
     ET.SubElement(package, "content_id").text = content_id
 
-    files_elem = ET.SubElement(root, "files", default_split_size="0")
+    files_elem = ET.SubElement(root, "files", img_no="0")
     rootdir_elem = ET.SubElement(root, "rootdir")
 
     # Collect directories and files
@@ -115,19 +115,28 @@ def generate_gp4(app_dir, output_gp4, content_id, passcode="00000000000000000000
         if rel_dir != ".":
             all_dirs.add(rel_dir)
         for fname in filenames:
+            if fname == os.path.basename(output_gp4):
+                continue
             full_path = os.path.join(dirpath, fname)
             rel_file = os.path.relpath(full_path, app_dir).replace("\\", "/")
             all_files.append((full_path, rel_file))
 
-    # Add directory hierarchy
+    # Add directory hierarchy (nested <dir> elements)
+    dir_elements = {"": rootdir_elem}
     for d in sorted(all_dirs):
         parts = d.split("/")
-        if len(parts) == 1:
-            ET.SubElement(rootdir_elem, "dir", targ_name=parts[0])
+        parent = ""
+        for part in parts:
+            curr = f"{parent}/{part}" if parent else part
+            if curr not in dir_elements:
+                parent_elem = dir_elements[parent]
+                dir_elements[curr] = ET.SubElement(parent_elem, "dir", targ_name=part)
+            parent = curr
 
     # Add files
     for full_path, rel_path in sorted(all_files, key=lambda x: x[1]):
-        ET.SubElement(files_elem, "file", targ_path=rel_path).text = full_path
+        orig_win = rel_path.replace("/", "\\")
+        ET.SubElement(files_elem, "file", targ_path=rel_path, orig_path=orig_win)
 
     tree = ET.ElementTree(root)
     ET.indent(tree, space="  ")
@@ -200,16 +209,33 @@ def main():
 
     if pub_cmd:
         print(f"Using publishing tool: {pub_cmd}")
+        out_dir = os.path.dirname(out_pkg)
+        gp4_dir = os.path.dirname(gp4_path)
+
         cmd = []
         if sys.platform != "win32" and pub_cmd.endswith(".exe"):
             wine_bin = shutil.which("wine64") or shutil.which("wine") or "wine"
-            cmd = [wine_bin, pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_pkg]
+            cmd = [wine_bin, pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_dir]
         else:
-            cmd = [pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_pkg]
+            cmd = [pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_dir]
 
         print("Executing:", " ".join(cmd))
-        subprocess.check_call(cmd)
-        print(f"Successfully built PS4 PKG: {out_pkg}")
+        subprocess.check_call(cmd, cwd=gp4_dir)
+
+        if not os.path.isfile(out_pkg):
+            # Look for generated .pkg in out_dir or gp4_dir
+            for search_dir in (out_dir, gp4_dir):
+                pkgs = [os.path.join(search_dir, f) for f in os.listdir(search_dir) if f.lower().endswith(".pkg")]
+                if pkgs:
+                    newest_pkg = max(pkgs, key=os.path.getmtime)
+                    if os.path.abspath(newest_pkg) != out_pkg:
+                        shutil.move(newest_pkg, out_pkg)
+                    break
+
+        if os.path.isfile(out_pkg):
+            print(f"Successfully built PS4 PKG: {out_pkg} ({os.path.getsize(out_pkg)} bytes)")
+        else:
+            raise FileNotFoundError(f"Expected PKG not found at {out_pkg}")
     else:
         print("Warning: orbis-pub-cmd executable not found. Generated GP4 and app structure are ready in:", app_dir)
 
