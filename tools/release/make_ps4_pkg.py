@@ -164,9 +164,11 @@ def main():
     sfo_data = build_param_sfo({
         "APP_TYPE": 1,
         "APP_VER": "01.00",
+        "ATTRIBUTE": 0,
         "CATEGORY": "gd",
         "CONTENT_ID": args.content_id,
         "DOWNLOAD_DATA_SIZE": 0,
+        "FORMAT": "obs",
         "SYSTEM_VER": 0x05050000,
         "TITLE": "OpenWheels",
         "TITLE_ID": args.title_id,
@@ -215,9 +217,9 @@ def main():
         cmd = []
         if sys.platform != "win32" and pub_cmd.endswith(".exe"):
             wine_bin = shutil.which("wine64") or shutil.which("wine") or "wine"
-            cmd = [wine_bin, pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_dir]
+            cmd = [wine_bin, pub_cmd, "img_create", "--oformat", "pkg", "--skip_digest", gp4_path, out_dir]
         else:
-            cmd = [pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_dir]
+            cmd = [pub_cmd, "img_create", "--oformat", "pkg", "--skip_digest", gp4_path, out_dir]
 
         print("Executing:", " ".join(cmd))
         subprocess.check_call(cmd, cwd=gp4_dir)
