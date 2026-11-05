@@ -89,7 +89,11 @@ set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL "MinSizeRel;Release;")
 # Engine era: C++14 (CocosConfigDefine says 11; MSVC's floor is 14 anyway).
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+if(PS4)
+    set(CMAKE_CXX_EXTENSIONS ON)
+else()
+    set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
 
 if(MSVC)
     # Applies to the engine and the game alike (directory scope, set before add_subdirectory).
