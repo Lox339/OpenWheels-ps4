@@ -1,5 +1,5 @@
 diff --git a/cmake/Modules/CocosConfigDefine.cmake b/cmake/Modules/CocosConfigDefine.cmake
-index 4525083..14b7c94 100644
+index 4525083..46742dd 100644
 --- a/cmake/Modules/CocosConfigDefine.cmake
 +++ b/cmake/Modules/CocosConfigDefine.cmake
 @@ -9,9 +9,15 @@
@@ -12,24 +12,23 @@ index 4525083..14b7c94 100644
   elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
       if(ANDROID)
           set(PLATFORM_FOLDER android)
-+ elseif(PS4 OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD|PS4|Orbis")
-+     set(PS4 TRUE)
-+     set(PLATFORM_FOLDER ps4)
++     elseif(PS4 OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD|PS4|Orbis")
++         set(PS4 TRUE)
++         set(PLATFORM_FOLDER ps4)
       else()
           set(LINUX TRUE)
           set(PLATFORM_FOLDER linux)
 diff --git a/cmake/Modules/CocosConfigDepend.cmake b/cmake/Modules/CocosConfigDepend.cmake
-index ff0983a..470021f 100644
+index ff0983a..f06c67f 100644
 --- a/cmake/Modules/CocosConfigDepend.cmake
 +++ b/cmake/Modules/CocosConfigDepend.cmake
-@@ -4,6 +4,8 @@ macro(cocos2dx_depend)
-     set(PLATFORM_SPECIFIC_LIBS)
+@@ -4,7 +4,9 @@ macro(cocos2dx_depend)
  
      if(WINDOWS)
          list(APPEND PLATFORM_SPECIFIC_LIBS ws2_32 userenv psapi winmm Version Iphlpapi opengl32)
+-    elseif(LINUX)
 +    elseif(PS4)
 +        list(APPEND PLATFORM_SPECIFIC_LIBS kernel SceVideoOut SceUserService ScePad SceSysmodule SceNet SceNetCtl SceAudioOut ScePigletv2VSH z png curl polarssl)
--    elseif(LINUX)
 +    elseif(LINUX AND NOT PS4)
          # need review those libs: X11 Xi Xrandr Xxf86vm Xinerama Xcursor rt m
          list(APPEND PLATFORM_SPECIFIC_LIBS dl X11 Xi Xrandr Xxf86vm Xinerama Xcursor rt m)
@@ -44,16 +43,10 @@ index ff0983a..470021f 100644
          cocos_use_pkg(${target} GTK3)
          cocos_use_pkg(${target} ZLIB)
 diff --git a/cocos/audio/AudioEngine.cpp b/cocos/audio/AudioEngine.cpp
-index 4e81f75..8ab12dc 100644
+index 4e81f75..f1af34a 100644
 --- a/cocos/audio/AudioEngine.cpp
 +++ b/cocos/audio/AudioEngine.cpp
-@@ -37,10 +37,14 @@
- #include "audio/apple/AudioEngine-inl.h"
- #elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
- #include "audio/win32/AudioEngine-win32.h"
-+#elif CC_TARGET_PLATFORM == CC_PLATFORM_PS4
-+#include "audio/ps4/AudioEngine-ps4.h"
- #elif CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
+@@ -41,6 +41,8 @@
  #include "audio/winrt/AudioEngine-winrt.h"
  #elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
  #include "audio/win32/AudioEngine-win32.h"
@@ -94,7 +87,7 @@ index 013fe09..4ecd639 100644
  #include "platform/tizen/CCGL-tizen.h"
  #endif
 diff --git a/cocos/platform/CCPlatformConfig.h b/cocos/platform/CCPlatformConfig.h
-index 1b835bd..1452792 100644
+index 1b835bd..b5aafce 100644
 --- a/cocos/platform/CCPlatformConfig.h
 +++ b/cocos/platform/CCPlatformConfig.h
 @@ -53,6 +53,7 @@ THE SOFTWARE.
@@ -105,19 +98,19 @@ index 1b835bd..1452792 100644
  
  // Determine target platform by compile environment macro.
  #define CC_TARGET_PLATFORM             CC_PLATFORM_UNKNOWN
-@@ -82,6 +83,12 @@ THE SOFTWARE.
+@@ -81,6 +82,12 @@ THE SOFTWARE.
+     #define CC_TARGET_PLATFORM         CC_PLATFORM_WIN32
  #endif
  
- // linux
 +// ps4
 +#if defined(__ORBIS__) || defined(PS4) || defined(__PS4__)
 +    #undef  CC_TARGET_PLATFORM
 +    #define CC_TARGET_PLATFORM         CC_PLATFORM_PS4
 +#endif
 +
+ // linux
  #if defined(LINUX) && !defined(__APPLE__)
      #undef  CC_TARGET_PLATFORM
-     #define CC_TARGET_PLATFORM         CC_PLATFORM_LINUX
 diff --git a/cocos/platform/CMakeLists.txt b/cocos/platform/CMakeLists.txt
 index e577564..71f41c1 100644
 --- a/cocos/platform/CMakeLists.txt
@@ -147,9 +140,10 @@ index e577564..71f41c1 100644
  
      if(NOT CMAKE_CROSSCOMPILING)
 diff --git a/cocos/storage/local-storage/LocalStorage.cpp b/cocos/storage/local-storage/LocalStorage.cpp
+index 640142a..e4f133a 100644
 --- a/cocos/storage/local-storage/LocalStorage.cpp
 +++ b/cocos/storage/local-storage/LocalStorage.cpp
-@@ -34,7 +34,7 @@
+@@ -31,7 +31,7 @@
  #include "storage/local-storage/LocalStorage.h"
  #include "platform/CCPlatformMacros.h"
  
@@ -158,25 +152,16 @@ diff --git a/cocos/storage/local-storage/LocalStorage.cpp b/cocos/storage/local-
  
  #include <stdio.h>
  #include <stdlib.h>
-@@ -235,4 +235,4 @@ void localStorageClear()
+@@ -178,4 +178,4 @@ void localStorageClear()
          printf("Error in localStorage.clear()\n");
  }
  
 -#endif // #if (CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID)
 +#endif // #if (CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID && CC_TARGET_PLATFORM != CC_PLATFORM_PS4)
 diff --git a/external/CMakeLists.txt b/external/CMakeLists.txt
-index 2824e83..8a67df1 100644
+index afb8201..c45b9c7 100644
 --- a/external/CMakeLists.txt
 +++ b/external/CMakeLists.txt
-@@ -74,7 +74,7 @@ if(NOT LINUX)
-     )
- endif(NOT LINUX)
-     
--if(LINUX)
-+if(LINUX AND NOT PS4)
-     add_subdirectory(linux-specific/fmod)
-     target_link_libraries(external 
-         ext_fmod
 @@ -107,7 +107,7 @@ if(WINDOWS)
      )
  endif()
