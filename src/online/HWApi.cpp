@@ -104,7 +104,11 @@ bool serverError(const std::string& body, std::string* error) {
     return false;
 }
 
-std::string cacheDir() { return FileUtils::getInstance()->getWritablePath() + "online/"; }
+std::string cacheDir() {
+    std::string path = FileUtils::getInstance()->getWritablePath() + "online/";
+    FileUtils::getInstance()->createDirectory(path);
+    return path;
+}
 
 bool matches(const OnlineLevelInfo& l, const LevelQuery& q) {
     if (q.searchBy == SearchBy::None || q.term.empty()) return true;
@@ -256,6 +260,9 @@ void HWApi::pump() {
     });
     network::HttpClient::getInstance()->setTimeoutForConnect(15);
     network::HttpClient::getInstance()->setTimeoutForRead(60);
+#if defined(__ORBIS__) || defined(PS4) || defined(__PS4__)
+    network::HttpClient::getInstance()->setSSLVerification("");
+#endif
     network::HttpClient::getInstance()->send(request);
     request->release();
 }

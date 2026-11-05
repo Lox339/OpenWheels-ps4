@@ -104,6 +104,21 @@ Gradle copies your game files from `binary/` into the APK. The APK is written to
 `OW_KEYSTORE_PROPERTIES` describes, or with the debug key if it isn't set. See
 [ANDROID.md](ANDROID.md).
 
+## PlayStation 4 (PS4)
+
+Requirements:
+- OpenOrbis PS4 Toolchain (Clang/LLD cross-compiler for Orbis OS)
+- CyB1K PS4 Fake PKG Tools (`orbis-pub-cmd.exe` via Wine or Linux)
+
+```sh
+tools/fetch_engine.sh
+cmake -S . -B build-ps4 -DCMAKE_TOOLCHAIN_FILE=tools/ps4.toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+cmake --build build-ps4 --config Release
+tools/package_ps4.sh --build-dir build-ps4 --out dist --data game-data
+```
+
+The resulting package is written to `dist/OpenWheels-ps4.pkg` and can be installed via GoldHEN / HEN Package Installer on jailbroken PS4 consoles (Firmware 5.05+).
+
 ## Project layout
 
 ```

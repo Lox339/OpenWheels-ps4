@@ -2,8 +2,8 @@
 
 OpenWheels can be played start to finish with a game controller on every platform: Windows,
 Linux, macOS, Android (Bluetooth / USB pads and the built-in controls of handhelds like the AYN
-Odin and Thor) and iOS. The controller drives the game, moves through every menu, and rumbles on
-crashes. Phones, tablets and handhelds can also steer by tilting. None of this is part of the
+Odin and Thor), iOS and PlayStation 4 (DualShock 4). The controller drives the game, moves through every menu, and rumbles on
+crashes. Phones, tablets, handhelds and PS4 DualShock 4 can also steer by tilting (motion sensor). None of this is part of the
 original game. The code is in `src/input/` (marked `PAD (PC addition)` where it touches game code).
 
 ## Default controls

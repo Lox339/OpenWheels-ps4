@@ -25,7 +25,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__ORBIS__) || defined(PS4) || defined(__PS4__)
 #include <ifaddrs.h>
 #endif
 #endif
@@ -120,8 +120,8 @@ std::vector<Interface> ipv4Interfaces() {
         }
     }
     closesocket(s);
-#elif defined(__APPLE__)
-    // macOS / iOS (PC addition): BSD's SIOCGIFCONF records are variable-length; use getifaddrs.
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__ORBIS__) || defined(PS4) || defined(__PS4__)
+    // macOS / iOS / PS4 / BSD: use getifaddrs
     struct ifaddrs* list = nullptr;
     if (getifaddrs(&list) != 0) return result;
     for (struct ifaddrs* a = list; a; a = a->ifa_next) {
@@ -202,6 +202,8 @@ std::string deviceName() {
         }
     }
     return "PC";
+#elif defined(__ORBIS__) || defined(PS4) || defined(__PS4__)
+    return "PlayStation 4";
 #elif defined(__ANDROID__)
     char model[PROP_VALUE_MAX] = {0};
     char maker[PROP_VALUE_MAX] = {0};

@@ -5,6 +5,7 @@
 #   Linux (x86_64)     OpenWheels-linux-x86_64.tar.gz      required
 #   macOS (x86_64)     OpenWheels-macos.zip                best effort (unsigned)
 #   iOS                OpenWheels-ios-unsigned.ipa         best effort (unsigned, sideload)
+#   PS4                OpenWheels-ps4.pkg                  best effort (FPKG)
 #
 # Game files: the repository never contains Happy Wheels assets. The packages are built with the
 # game data of a previous OpenWheels release (its Windows zip: assets/, generated/, ios/ and the
@@ -348,9 +349,81 @@ jobs:
           name: OpenWheels-ios
           path: dist/OpenWheels-ios-unsigned.ipa
 
+  ps4:
+    name: PlayStation 4 (best effort)
+    needs: game-data
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools and Wine
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang lld cmake ninja-build wine wine32 wine64 python3
+      - name: Setup OpenOrbis Toolchain
+        run: |
+          echo "Setting up OpenOrbis PS4 Toolchain..."
+          f=toolchain-llvm-18
+          curl -fLJO https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.4/$f.zip || \
+          curl -fLJO https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.3/toolchain-llvm-18.2.zip
+          unzip -q toolchain*.zip
+          tar -xzf toolchain-llvm-*.tar.gz -C ./ || true
+          echo "OO_PS4_TOOLCHAIN=${PWD}/OpenOrbis/PS4Toolchain" >> "${GITHUB_ENV}"
+          echo "${PWD}/OpenOrbis/PS4Toolchain/bin/linux" >> "${GITHUB_PATH}"
+      - name: Setup CyB1K PS4 Fake PKG Tools
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CYB1K_URL: ${{ secrets.CYB1K_TOOLS_URL }}
+          CYB1K_PAT: ${{ secrets.CYB1K_TOKEN }}
+        run: |
+          mkdir -p tools/ps4_fake_pkg_tools
+          if [ -n "${CYB1K_URL:-}" ]; then
+            echo "Cloning Fake PKG Tools from secret URL..."
+            git clone --depth 1 "${CYB1K_URL}" tools/ps4_fake_pkg_tools
+          elif [ -n "${CYB1K_PAT:-}" ]; then
+            echo "Cloning Fake PKG Tools with secret token..."
+            git clone --depth 1 "https://${CYB1K_PAT}@github.com/CyB1K/PS4-Fake-PKG-Tools-3.87.git" tools/ps4_fake_pkg_tools
+          else
+            echo "Cloning CyB1K/PS4-Fake-PKG-Tools-3.87 using GITHUB_TOKEN..."
+            git clone --depth 1 https://github.com/CyB1K/PS4-Fake-PKG-Tools-3.87.git tools/ps4_fake_pkg_tools || {
+              curl -fsSL https://github.com/CyB1K/PS4-Fake-PKG-Tools-3.87/archive/refs/heads/main.zip -o pkgtools.zip
+              unzip -q pkgtools.zip
+              mv PS4-Fake-PKG-Tools-3.87-main/* tools/ps4_fake_pkg_tools/
+            }
+          fi
+          echo "CYB1K_TOOLS_DIR=${PWD}/tools/ps4_fake_pkg_tools" >> "${GITHUB_ENV}"
+      - uses: actions/cache@v4
+        with:
+          path: thirdparty/cocos2d-x
+          key: engine-posix-${{ env.ENGINE_CACHE_VERSION }}-${{ hashFiles('tools/fetch_engine.sh', 'thirdparty/patches/*.patch') }}
+      - name: Fetch cocos2d-x
+        run: tools/fetch_engine.sh
+      - uses: actions/download-artifact@v4
+        with:
+          name: game-data
+          path: game-data
+      - name: Build for PS4
+        run: |
+          cmake -S . -B build-ps4 \
+            -DCMAKE_TOOLCHAIN_FILE=tools/ps4.toolchain.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DOW_WITH_PC_LAYER=OFF
+          cmake --build build-ps4 --config Release -j$(nproc)
+      - name: Package (.pkg FPKG)
+        run: |
+          tools/package_ps4.sh --build-dir build-ps4 --out dist \
+            --assets game-data/assets --ios game-data/ios --data game-data \
+            --tools-dir "${CYB1K_TOOLS_DIR}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OpenWheels-ps4
+          path: dist/OpenWheels-ps4.pkg
+
   release:
     name: Publish release
-    needs: [linux, windows, android, macos, ios]
+    needs: [linux, windows, android, macos, ios, ps4]
     if: >-
       always() &&
       needs.linux.result == 'success' && needs.windows.result == 'success' && needs.android.result == 'success' &&
@@ -381,6 +454,7 @@ jobs:
             echo "- **Linux (x86_64):** \`OpenWheels-linux-x86_64.tar.gz\` - unpack and run \`./OpenWheels\`."
             [ -f packages/OpenWheels-macos.zip ] && echo "- **macOS:** \`OpenWheels-macos.zip\` (unsigned: right-click the app, Open)."
             [ -f packages/OpenWheels-ios-unsigned.ipa ] && echo "- **iOS:** \`OpenWheels-ios-unsigned.ipa\` (unsigned: sideload with AltStore, Sideloadly or similar)."
+            [ -f packages/OpenWheels-ps4.pkg ] && echo "- **PlayStation 4:** \`OpenWheels-ps4.pkg\` (Fake PKG for 5.05+)."
             echo
             echo "## Legal"
             echo "OpenWheels is an unofficial fan project. Happy Wheels and its assets belong to Fancy Force / Jim Bonacci. See [NOTICE.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/NOTICE.md)."

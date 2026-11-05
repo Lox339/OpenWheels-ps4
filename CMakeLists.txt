@@ -122,6 +122,8 @@ elseif(IOS)
     set(OW_PLATFORM_DIRS ios)
 elseif(APPLE)
     set(OW_PLATFORM_DIRS mac desktop unix)
+elseif(PS4 OR CMAKE_SYSTEM_NAME STREQUAL "PS4" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR DEFINED ENV{OO_PS4_TOOLCHAIN})
+    set(OW_PLATFORM_DIRS ps4)
 else()
     set(OW_PLATFORM_DIRS linux desktop unix)
 endif()
@@ -135,7 +137,7 @@ file(GLOB_RECURSE GAME_SOURCES CONFIGURE_DEPENDS
      ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/ios/*.m
      ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/mac/*.mm
      )
-foreach(platform_dir android ios mac linux win32 desktop unix winrt tizen emscripten)
+foreach(platform_dir android ios mac linux win32 desktop unix winrt tizen emscripten ps4)
     list(FIND OW_PLATFORM_DIRS ${platform_dir} ow_platform_index)
     if(ow_platform_index EQUAL -1)
         list(FILTER GAME_SOURCES EXCLUDE REGEX "/src/platform/${platform_dir}/")
@@ -237,6 +239,16 @@ if(APPLE)
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/mac/Info.plist")
     endif()
 endif()
+if(PS4 OR CMAKE_SYSTEM_NAME STREQUAL "PS4" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR DEFINED ENV{OO_PS4_TOOLCHAIN})
+    target_link_libraries(${APP_NAME} -lc -lkernel -lc++ -lSceVideoOut -lSceUserService -lScePad -lSceSysmodule -lSceNet -lSceNetCtl -lSceAudioOut -lScePigletv2VSH)
+    find_program(CREATE_EBOOT NAMES create-eboot HINTS "$ENV{OO_PS4_TOOLCHAIN}/bin/linux" "$ENV{OO_PS4_TOOLCHAIN}/bin/windows" "$ENV{OO_PS4_TOOLCHAIN}/bin/macos")
+    if(CREATE_EBOOT)
+        add_custom_command(TARGET ${APP_NAME} POST_BUILD
+            COMMAND ${CREATE_EBOOT} "$<TARGET_FILE:${APP_NAME}>" "$<TARGET_FILE_DIR:${APP_NAME}>/eboot.bin"
+            COMMENT "Creating PS4 FSELF eboot.bin"
+        )
+    endif()
+endif()
 if(MSVC)
     # As in the engine's own VS projects (IgnoreSpecificDefaultLibraries): the
     # prebuilt freetype/libjpeg/libwebp were compiled with /MT and request
@@ -256,7 +268,7 @@ set_target_properties(${APP_NAME} PROPERTIES
 # PC platform layer (keyboard -> virtual touches, --dump-world verification runner). Needs the
 # reconstructed game to link, so it stays OFF until src/game is complete.
 option(OW_WITH_PC_LAYER "Build the PC keyboard bridge and --dump-world runner" ON)
-if(OW_WITH_PC_LAYER AND NOT IOS)
+if(OW_WITH_PC_LAYER AND NOT IOS AND NOT PS4)
     target_compile_definitions(${APP_NAME} PRIVATE OW_WITH_PC_LAYER=1)
 endif()
 
