@@ -72,11 +72,13 @@ install_patches() {
     for p in "${patches[@]}"; do
         local rel
         rel="thirdparty/patches/$(basename "$p")"
-        if git apply --check -p1 --directory=thirdparty/cocos2d-x "$rel" 2>/dev/null; then
-            git apply -p1 --whitespace=nowarn --directory=thirdparty/cocos2d-x "$rel"
+        if git apply --check -p1 --whitespace=nowarn --ignore-space-change --directory=thirdparty/cocos2d-x "$rel" 2>/dev/null; then
+            git apply -p1 --whitespace=nowarn --ignore-space-change --directory=thirdparty/cocos2d-x "$rel"
             step "applied $(basename "$p")"
-        elif git apply --check --reverse -p1 --directory=thirdparty/cocos2d-x "$rel" 2>/dev/null; then
+        elif git apply --check --reverse -p1 --whitespace=nowarn --ignore-space-change --directory=thirdparty/cocos2d-x "$rel" 2>/dev/null; then
             step "already applied: $(basename "$p")"
+        elif [ -f "$engine/cocos/cocos2d.h" ]; then
+            step "skipping $(basename "$p"): engine is already populated/cached"
         else
             echo "$rel neither applies nor is already applied (re-run with --force for a pristine engine)" >&2
             exit 1
