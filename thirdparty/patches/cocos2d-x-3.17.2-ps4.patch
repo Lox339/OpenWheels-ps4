@@ -73,6 +73,37 @@ index f26faa9..d1c18cd 100644
  elseif(LINUX)
      # OpenWheels: the OpenAL backend of win32 (portable C++11 + OpenAL), as cocos2d-x 4 does.
      set(COCOS_AUDIO_PLATFORM_HEADER
+diff --git a/cocos/cocos2d.h b/cocos/cocos2d.h
+index f10912b..6e09cce 100644
+--- a/cocos/cocos2d.h
++++ b/cocos/cocos2d.h
+@@ -226,6 +226,13 @@ THE SOFTWARE.
+     #include "platform/mac/CCStdC-mac.h"
+ #endif // CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+ 
++#if (CC_TARGET_PLATFORM == CC_PLATFORM_PS4)
++    #include "platform/ps4/CCApplication-ps4.h"
++    #include "platform/ps4/CCGLViewImpl-ps4.h"
++    #include "platform/ps4/CCGL-ps4.h"
++    #include "platform/ps4/CCStdC-ps4.h"
++#endif // CC_TARGET_PLATFORM == CC_PLATFORM_PS4
++
+ #if (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
+     #include "platform/linux/CCApplication-linux.h"
+     #include "platform/desktop/CCGLViewImpl-desktop.h"
+diff --git a/cocos/platform/CCApplication.h b/cocos/platform/CCApplication.h
+index ad86810..44f4949 100644
+--- a/cocos/platform/CCApplication.h
++++ b/cocos/platform/CCApplication.h
+@@ -42,6 +42,8 @@ THE SOFTWARE.
+ #include "platform/winrt/CCApplication.h"
+ #elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
+ #include "platform/linux/CCApplication-linux.h"
++#elif CC_TARGET_PLATFORM == CC_PLATFORM_PS4
++#include "platform/ps4/CCApplication-ps4.h"
+ #endif
+ 
+ /// @endcond
 diff --git a/cocos/platform/CCGL.h b/cocos/platform/CCGL.h
 index 013fe09..4ecd639 100644
 --- a/cocos/platform/CCGL.h
@@ -87,7 +118,7 @@ index 013fe09..4ecd639 100644
  #include "platform/tizen/CCGL-tizen.h"
  #endif
 diff --git a/cocos/platform/CCPlatformConfig.h b/cocos/platform/CCPlatformConfig.h
-index 1b835bd..b5aafce 100644
+index 1b835bd..16080df 100644
 --- a/cocos/platform/CCPlatformConfig.h
 +++ b/cocos/platform/CCPlatformConfig.h
 @@ -53,6 +53,7 @@ THE SOFTWARE.
@@ -98,7 +129,7 @@ index 1b835bd..b5aafce 100644
  
  // Determine target platform by compile environment macro.
  #define CC_TARGET_PLATFORM             CC_PLATFORM_UNKNOWN
-@@ -81,6 +82,12 @@ THE SOFTWARE.
+@@ -81,8 +82,14 @@ THE SOFTWARE.
      #define CC_TARGET_PLATFORM         CC_PLATFORM_WIN32
  #endif
  
@@ -109,8 +140,37 @@ index 1b835bd..b5aafce 100644
 +#endif
 +
  // linux
- #if defined(LINUX) && !defined(__APPLE__)
+-#if defined(LINUX) && !defined(__APPLE__)
++#if defined(LINUX) && !defined(__APPLE__) && !defined(PS4) && !defined(__ORBIS__) && !defined(__PS4__)
      #undef  CC_TARGET_PLATFORM
+     #define CC_TARGET_PLATFORM         CC_PLATFORM_LINUX
+ #endif
+diff --git a/cocos/platform/CCPlatformDefine.h b/cocos/platform/CCPlatformDefine.h
+index d82438e..ef52a1a 100644
+--- a/cocos/platform/CCPlatformDefine.h
++++ b/cocos/platform/CCPlatformDefine.h
+@@ -40,6 +40,8 @@ THE SOFTWARE.
+ #include "platform/win32/CCPlatformDefine-win32.h"
+ #elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
+ #include "platform/linux/CCPlatformDefine-linux.h"
++#elif CC_TARGET_PLATFORM == CC_PLATFORM_PS4
++#include "platform/ps4/CCPlatformDefine-ps4.h"
+ #endif
+ 
+ /// @endcond
+diff --git a/cocos/platform/CCStdC.h b/cocos/platform/CCStdC.h
+index a90f921..746af91 100644
+--- a/cocos/platform/CCStdC.h
++++ b/cocos/platform/CCStdC.h
+@@ -41,6 +41,8 @@ THE SOFTWARE.
+ #include "platform/winrt/CCStdC.h"
+ #elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
+ #include "platform/linux/CCStdC-linux.h"
++#elif CC_TARGET_PLATFORM == CC_PLATFORM_PS4
++#include "platform/ps4/CCStdC-ps4.h"
+ #endif
+ 
+ #endif /* __PLATFORM_CCSTDC_H__*/
 diff --git a/cocos/platform/CMakeLists.txt b/cocos/platform/CMakeLists.txt
 index e577564..71f41c1 100644
 --- a/cocos/platform/CMakeLists.txt
@@ -158,11 +218,23 @@ index 640142a..e4f133a 100644
  
 -#endif // #if (CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID)
 +#endif // #if (CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID && CC_TARGET_PLATFORM != CC_PLATFORM_PS4)
+diff --git a/cocos/ui/CMakeLists.txt b/cocos/ui/CMakeLists.txt
+index 28b2bbd..0e3e464 100644
+--- a/cocos/ui/CMakeLists.txt
++++ b/cocos/ui/CMakeLists.txt
+@@ -49,6 +49,7 @@ elseif(APPLE)
+             ui/UIEditBox/iOS/UITextView+CCUITextInput.mm
+             )
+     endif()
++elseif(PS4)
+ elseif(LINUX)
+     set(COCOS_UI_SPECIFIC_HEADER
+         ui/UIEditBox/UIEditBoxImpl-linux.h
 diff --git a/external/CMakeLists.txt b/external/CMakeLists.txt
-index afb8201..c45b9c7 100644
+index 4ff49d6..2b914c1 100644
 --- a/external/CMakeLists.txt
 +++ b/external/CMakeLists.txt
-@@ -107,7 +107,7 @@ if(WINDOWS)
+@@ -103,7 +103,7 @@ if(WINDOWS)
      )
  endif()
  
