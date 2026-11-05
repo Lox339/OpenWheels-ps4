@@ -108,9 +108,11 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo dpkg --add-architecture i386
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends clang lld cmake ninja-build wine wine32 wine64 python3 p7zip-full
+          sudo apt-get install -y -qq --no-install-recommends clang lld cmake ninja-build wine64 python3 unar
+          if [ ! -f /usr/local/bin/wine ] && [ -f /usr/bin/wine64 ]; then
+            sudo ln -sf /usr/bin/wine64 /usr/local/bin/wine
+          fi
       - name: Setup OpenOrbis Toolchain
         run: |
           echo "Setting up OpenOrbis PS4 Toolchain..."
@@ -131,14 +133,14 @@ jobs:
           if [ -n "${CYB1K_URL:-}" ]; then
             echo "Downloading Fake PKG Tools from custom URL..."
             curl -fL -o pkgtools.archive "${CYB1K_URL}"
-            7z x -y pkgtools.archive -o"tools/ps4_fake_pkg_tools/"
+            unar -D -f -o tools/ps4_fake_pkg_tools pkgtools.archive
           elif [ -n "${CYB1K_PAT:-}" ]; then
             echo "Cloning Fake PKG Tools with secret token..."
             git clone --depth 1 "https://${CYB1K_PAT}@github.com/CyB1K/PS4-Fake-PKG-Tools-3.87.git" tools/ps4_fake_pkg_tools
           else
             echo "Downloading CyB1K PS4 Fake PKG Tools V7 release..."
             curl -fL -o pkgtools.rar "https://github.com/CyB1K/PS4-Fake-PKG-Tools-3.87/releases/download/v7/PS4_Fake_PKG_Tools_3.87_V7.rar"
-            7z x -y pkgtools.rar -o"tools/ps4_fake_pkg_tools/"
+            unar -D -f -o tools/ps4_fake_pkg_tools pkgtools.rar
           fi
           echo "CYB1K_TOOLS_DIR=${PWD}/tools/ps4_fake_pkg_tools" >> "${GITHUB_ENV}"
           find "${PWD}/tools/ps4_fake_pkg_tools" -iname "*orbis-pub-cmd*.exe" || true

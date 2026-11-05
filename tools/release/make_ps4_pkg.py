@@ -202,7 +202,8 @@ def main():
         print(f"Using publishing tool: {pub_cmd}")
         cmd = []
         if sys.platform != "win32" and pub_cmd.endswith(".exe"):
-            cmd = ["wine", pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_pkg]
+            wine_bin = shutil.which("wine64") or shutil.which("wine") or "wine"
+            cmd = [wine_bin, pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_pkg]
         else:
             cmd = [pub_cmd, "img_create", "--oformat", "pkg", gp4_path, out_pkg]
 
