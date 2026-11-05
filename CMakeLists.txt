@@ -194,7 +194,7 @@ if(OW_GAME_TUS)
             "-include;${CMAKE_CURRENT_SOURCE_DIR}/src/platform/compat/BionicRand.h")
     endif()
 endif()
-if(LINUX)
+if(LINUX AND NOT PS4)
     # The v3-deps-158 linux prebuilts (freetype, ...) are not position independent: link a classic
     # (non-PIE) executable, as toolchains of that era did by default.
     target_link_options(${APP_NAME} PRIVATE -no-pie)
