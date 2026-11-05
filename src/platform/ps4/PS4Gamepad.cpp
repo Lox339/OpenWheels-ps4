@@ -80,6 +80,14 @@ struct PS4VibrationParamFallback {
 #pragma pack(pop)
 
 extern "C" {
+int scePadInit(void);
+int scePadOpen(int, int, int, const void*);
+int scePadClose(int);
+int scePadReadState(int, void*);
+int scePadSetVibration(int, const void*);
+int sceUserServiceInitialize(const void*);
+int sceUserServiceGetInitialUser(int* userId);
+
 #if !defined(__ORBIS__) && !defined(PS4) && !defined(__PS4__)
 // Weak symbols for link compatibility in non-PS4 stubs
 __attribute__((weak)) int scePadInit(void) { return 0; }
