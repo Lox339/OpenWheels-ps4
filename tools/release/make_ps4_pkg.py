@@ -182,10 +182,14 @@ def main():
 
     # 4. Locate orbis-pub-cmd
     pub_cmd = None
-    if args.tools_dir:
-        cand = os.path.join(args.tools_dir, "orbis-pub-cmd.exe")
-        if os.path.isfile(cand):
-            pub_cmd = cand
+    if args.tools_dir and os.path.isdir(args.tools_dir):
+        for root, _, files in os.walk(args.tools_dir):
+            for f in files:
+                if f.lower() in ("orbis-pub-cmd.exe", "orbis-pub-cmd"):
+                    pub_cmd = os.path.join(root, f)
+                    break
+            if pub_cmd:
+                break
 
     if not pub_cmd:
         # Search PATH

@@ -30,7 +30,15 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-bin="$build_dir/bin/OpenWheels"
+bin=""
+for cand in "$build_dir/bin/OpenWheels" "$build_dir/bin" "$build_dir"; do
+    if [ -f "$cand/eboot.bin" ] || [ -f "$cand/OpenWheels" ]; then
+        bin="$cand"
+        break
+    fi
+done
+[ -n "$bin" ] || bin="$build_dir/bin/OpenWheels"
+
 if [ ! -f "$bin/eboot.bin" ] && [ -f "$bin/OpenWheels" ]; then
     echo "Creating eboot.bin from $bin/OpenWheels..."
     if command -v create-eboot >/dev/null 2>&1; then
