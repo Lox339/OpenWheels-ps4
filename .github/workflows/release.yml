@@ -114,9 +114,9 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt-get update -qq -o Acquire::Retries=3 || true
           sudo apt-get install -y -qq --no-install-recommends -o Acquire::Retries=3 \
-            clang lld llvm cmake ninja-build python3 unar xvfb wine wine32:i386 wine64 libwine:i386 || \
+            clang lld llvm cmake ninja-build python3 python3-pil unar xvfb wine wine32:i386 wine64 libwine:i386 || \
           sudo apt-get install -y -qq --no-install-recommends -o Acquire::Retries=3 \
-            clang lld llvm cmake ninja-build python3 unar xvfb wine wine64
+            clang lld llvm cmake ninja-build python3 python3-pil unar xvfb wine wine64
           wine_bin="$(command -v wine || command -v wine64 || find /usr -name "wine" 2>/dev/null | grep -E "bin/wine$" | head -n 1 || true)"
           if [ -n "$wine_bin" ]; then
             sudo ln -sf "$wine_bin" /usr/local/bin/wine
@@ -182,6 +182,20 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DOW_WITH_PC_LAYER=OFF
           cmake --build build-ps4 --config Release -j$(nproc) 2>&1 | tee build-ps4.log
+      - name: Prepare PS4 Cover and Icon Art
+        run: |
+          python3 -c "
+          from PIL import Image
+          import os
+          os.makedirs('res/ps4', exist_ok=True)
+          if os.path.isfile('res/ps4/icon0_source.jpg'):
+              Image.open('res/ps4/icon0_source.jpg').convert('RGBA').resize((512, 512), getattr(Image, 'Resampling', Image).LANCZOS).save('res/ps4/icon0.png', format='PNG', optimize=True)
+              print('Generated 512x512 res/ps4/icon0.png')
+          if os.path.isfile('res/ps4/pic1_source.jpg'):
+              Image.open('res/ps4/pic1_source.jpg').convert('RGBA').resize((1920, 1080), getattr(Image, 'Resampling', Image).LANCZOS).save('res/ps4/pic1.png', format='PNG', optimize=True)
+              Image.open('res/ps4/pic1_source.jpg').convert('RGBA').resize((1920, 1080), getattr(Image, 'Resampling', Image).LANCZOS).save('res/ps4/pic0.png', format='PNG', optimize=True)
+              print('Generated 1920x1080 res/ps4/pic1.png and pic0.png')
+          "
       - name: Package (.pkg FPKG)
         run: |
           tools/package_ps4.sh --build-dir build-ps4 --out dist \
