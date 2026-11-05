@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <!-- Sky Gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1565C0"/>
+      <stop offset="40%" stop-color="#42A5F5"/>
+      <stop offset="75%" stop-color="#90CAF9"/>
+      <stop offset="100%" stop-color="#E3F2FD"/>
+    </linearGradient>
+
+    <!-- Sun Glow -->
+    <radialGradient id="sunGlow" cx="80%" cy="25%" r="40%">
+      <stop offset="0%" stop-color="#FFF9C4" stop-opacity="0.9"/>
+      <stop offset="30%" stop-color="#FFEE58" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Hill Gradient 1 (Far) -->
+    <linearGradient id="hillFar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#81C784"/>
+      <stop offset="100%" stop-color="#388E3C"/>
+    </linearGradient>
+
+    <!-- Hill Gradient 2 (Near) -->
+    <linearGradient id="hillNear" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4CAF50"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+
+    <!-- Dirt Gradient -->
+    <linearGradient id="dirtGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#795548"/>
+      <stop offset="100%" stop-color="#3E2723"/>
+    </linearGradient>
+
+    <!-- Steel Ramp Gradient -->
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CFD8DC"/>
+      <stop offset="50%" stop-color="#90A4AE"/>
+      <stop offset="100%" stop-color="#546E7A"/>
+    </linearGradient>
+
+    <!-- Gold Text Gradient -->
+    <linearGradient id="goldText" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF59D"/>
+      <stop offset="25%" stop-color="#FFD54F"/>
+      <stop offset="60%" stop-color="#FFA000"/>
+      <stop offset="100%" stop-color="#E65100"/>
+    </linearGradient>
+
+    <!-- Red Hazard Pattern -->
+    <pattern id="hazardPattern" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="20" height="40" fill="#D32F2F"/>
+      <rect x="20" width="20" height="40" fill="#FFFFFF"/>
+    </pattern>
+
+    <!-- Saw Blade Shadow -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+
+    <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="6" dy="12" stdDeviation="4" flood-color="#000" flood-opacity="0.7"/>
+    </filter>
+  </defs>
+
+  <!-- Sky Background -->
+  <rect width="1920" height="1080" fill="url(#skyGrad)"/>
+
+  <!-- Sun Rays & Glow -->
+  <circle cx="1500" cy="220" r="300" fill="url(#sunGlow)"/>
+  <circle cx="1500" cy="220" r="80" fill="#FFF9C4" opacity="0.9"/>
+
+  <!-- Clouds (Vector Clean) -->
+  <g fill="#FFFFFF" opacity="0.85">
+    <!-- Cloud 1 -->
+    <path d="M 180,240 q 30,-50 90,-40 q 60,-60 140,-20 q 60,-40 120,0 q 60,10 60,60 q 40,40 0,70 l -410,0 q -40,-30 0,-70 z"/>
+    <!-- Cloud 2 -->
+    <path d="M 820,180 q 25,-40 75,-30 q 50,-50 115,-15 q 50,-30 100,0 q 50,10 50,50 q 30,30 0,60 l -340,0 q -30,-30 0,-65 z" opacity="0.7"/>
+    <!-- Cloud 3 -->
+    <path d="M 1350,300 q 20,-30 60,-25 q 40,-40 90,-10 q 40,-25 80,0 q 40,10 40,40 q 25,25 0,50 l -270,0 q -25,-25 0,-55 z" opacity="0.75"/>
+  </g>
+
+  <!-- Distant Mountain / Hills -->
+  <path d="M -50,680 Q 300,480 650,620 T 1350,560 Q 1650,500 1970,640 L 1970,1100 L -50,1100 Z" fill="url(#hillFar)" opacity="0.7"/>
+
+  <!-- Midground Hills -->
+  <path d="M -50,740 Q 250,580 600,700 T 1300,680 Q 1620,590 1970,720 L 1970,1100 L -50,1100 Z" fill="url(#hillNear)"/>
+
+  <!-- Foreground Dirt / Course Base -->
+  <path d="M -50,860 Q 350,780 750,840 T 1550,820 Q 1780,790 1970,850 L 1970,1100 L -50,1100 Z" fill="url(#dirtGrad)"/>
+  <!-- Grass Trim on dirt -->
+  <path d="M -50,860 Q 350,780 750,840 T 1550,820 Q 1780,790 1970,850" stroke="#4CAF50" stroke-width="14" fill="none"/>
+
+  <!-- Obstacle Course Elements (Classic Happy Wheels Traps & Ramps) -->
+  <g id="course-traps" filter="url(#dropShadow)">
+    <!-- Wooden / Steel Stunts Ramp Left -->
+    <polygon points="120,860 380,680 440,680 200,860" fill="url(#steelGrad)" stroke="#37474F" stroke-width="4"/>
+    <polygon points="130,855 370,685 410,685 190,855" fill="url(#hazardPattern)"/>
+    <!-- Support Girders -->
+    <line x1="280" y1="750" x2="280" y2="860" stroke="#263238" stroke-width="10"/>
+    <line x1="380" y1="680" x2="380" y2="860" stroke="#263238" stroke-width="10"/>
+    <line x1="280" y1="760" x2="380" y2="850" stroke="#37474F" stroke-width="6"/>
+    <line x1="380" y1="760" x2="280" y2="850" stroke="#37474F" stroke-width="6"/>
+
+    <!-- Giant Loop-de-loop Track Center-Right -->
+    <path d="M 1150,840 C 1050,600 1200,420 1380,440 C 1540,460 1600,650 1480,830" fill="none" stroke="#263238" stroke-width="36"/>
+    <path d="M 1150,840 C 1050,600 1200,420 1380,440 C 1540,460 1600,650 1480,830" fill="none" stroke="url(#hazardPattern)" stroke-width="20"/>
+
+    <!-- Deadly Spinning Sawblade Hazard -->
+    <g transform="translate(1000, 780)">
+      <!-- Blade Teeth -->
+      <path d="M 0,-70 L 18,-50 L 50,-50 L 50,-18 L 70,0 L 50,18 L 50,50 L 18,50 L 0,70 L -18,50 L -50,50 L -50,18 L -70,0 L -50,-18 L -50,-50 L -18,-50 Z"
+            fill="#ECEFF1" stroke="#37474F" stroke-width="4"/>
+      <circle cx="0" cy="0" r="30" fill="#78909C" stroke="#263238" stroke-width="4"/>
+      <circle cx="0" cy="0" r="10" fill="#263238"/>
+      <!-- Stand -->
+      <polygon points="-8,70 8,70 12,120 -12,120" fill="#37474F"/>
+    </g>
+
+    <!-- Harpoon / Spikes Trap -->
+    <g transform="translate(680, 840)" fill="#78909C" stroke="#263238" stroke-width="3">
+      <polygon points="0,0 15,-60 30,0"/>
+      <polygon points="35,0 50,-75 65,0"/>
+      <polygon points="70,0 85,-65 100,0"/>
+      <polygon points="105,0 120,-80 135,0"/>
+    </g>
+
+    <!-- Checkpoint Finish Flag -->
+    <g transform="translate(1700, 720)">
+      <line x1="0" y1="0" x2="0" y2="140" stroke="#263238" stroke-width="8"/>
+      <polygon points="0,0 80,30 0,60" fill="#D32F2F" stroke="#B71C1C" stroke-width="3"/>
+      <circle cx="0" cy="0" r="8" fill="#FFD54F"/>
+    </g>
+  </g>
+
+  <!-- Silhouette / Stylized Vector Wheelchair Racer Leaping into Air -->
+  <g transform="translate(620, 480) rotate(-18)" filter="url(#dropShadow)">
+    <!-- Speed Lines Behind -->
+    <path d="M -160,-20 L -40,-10 M -200,20 L -30,25 M -150,60 L -50,55" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+    <!-- Main Wheelchair Frame -->
+    <!-- Large Wheel -->
+    <circle cx="0" cy="40" r="45" fill="none" stroke="#212121" stroke-width="12"/>
+    <circle cx="0" cy="40" r="45" fill="none" stroke="#90A4AE" stroke-width="4"/>
+    <circle cx="0" cy="40" r="10" fill="#212121"/>
+    <!-- Wheel Spokes -->
+    <line x1="-40" y1="40" x2="40" y2="40" stroke="#90A4AE" stroke-width="3"/>
+    <line x1="0" y1="0" x2="0" y2="80" stroke="#90A4AE" stroke-width="3"/>
+    <line x1="-28" y1="12" x2="28" y2="68" stroke="#90A4AE" stroke-width="3"/>
+    <line x1="-28" y1="68" x2="28" y2="12" stroke="#90A4AE" stroke-width="3"/>
+    <!-- Small Front Wheel -->
+    <circle cx="65" cy="70" r="16" fill="none" stroke="#212121" stroke-width="8"/>
+    <!-- Frame Tubes -->
+    <path d="M 0,40 L 55,68 L 40,25 L -5,20 Z" fill="#D32F2F" stroke="#212121" stroke-width="4"/>
+    <path d="M -5,20 L -15,-30 L 25,-15 L 20,25" fill="#B71C1C" stroke="#212121" stroke-width="4"/>
+    <!-- Rocket Thruster on Back -->
+    <polygon points="-25,10 -65,5 -60,35 -20,30" fill="#455A64" stroke="#212121" stroke-width="4"/>
+    <!-- Rocket Fire Flame -->
+    <polygon points="-65,8 -125,20 -60,32 -90,20" fill="#FF5722"/>
+    <polygon points="-65,12 -100,20 -60,28" fill="#FFEB3B"/>
+
+    <!-- Racer Character (Wheelchair Guy) -->
+    <!-- Torso / Green Shirt -->
+    <path d="M 5,-25 L 35,-15 L 45,-60 L 15,-65 Z" fill="#43A047" stroke="#1B5E20" stroke-width="4"/>
+    <!-- Arms Holding Wheels / Leaning -->
+    <path d="M 25,-50 L 55,-25 L 15,10" fill="none" stroke="#FDD835" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 25,-50 L 55,-25 L 15,10" fill="none" stroke="#212121" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Legs / Slacks -->
+    <path d="M 25,-15 L 60,-5 L 75,35" fill="none" stroke="#1E88E5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Head & Helmet -->
+    <circle cx="35" cy="-85" r="20" fill="#FFE082" stroke="#212121" stroke-width="3"/>
+    <!-- Red Helmet -->
+    <path d="M 15,-85 C 15,-110 55,-110 58,-82 C 55,-78 40,-75 25,-75 Z" fill="#E53935" stroke="#B71C1C" stroke-width="3"/>
+    <!-- Glasses / Face -->
+    <rect x="36" y="-88" width="14" height="8" rx="2" fill="#212121"/>
+    <!-- Tie flying back -->
+    <polygon points="16,-55 -15,-48 -10,-40 20,-50" fill="#E53935"/>
+  </g>
+
+  <!-- Giant Authentic Logo: OPENWHEELS -->
+  <g transform="translate(960, 220)" filter="url(#textShadow)">
+    <!-- Outer Deep Shadow / Outline -->
+    <text x="0" y="0" text-anchor="middle"
+          font-family="'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="140"
+          letter-spacing="4" fill="#000000" stroke="#000000" stroke-width="26" stroke-linejoin="round">
+      OPENWHEELS
+    </text>
+
+    <!-- Dark Red/Brown 3D Extrusion -->
+    <text x="0" y="10" text-anchor="middle"
+          font-family="'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="140"
+          letter-spacing="4" fill="#B71C1C" stroke="#B71C1C" stroke-width="18" stroke-linejoin="round">
+      OPENWHEELS
+    </text>
+
+    <!-- Main Gradient Text -->
+    <text x="0" y="0" text-anchor="middle"
+          font-family="'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="140"
+          letter-spacing="4" fill="url(#goldText)" stroke="#FFFFFF" stroke-width="4">
+      OPENWHEELS
+    </text>
+
+    <!-- Gloss Top Highlight -->
+    <text x="0" y="-3" text-anchor="middle"
+          font-family="'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="140"
+          letter-spacing="4" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.7">
+      OPENWHEELS
+    </text>
+
+    <!-- Subtitle Banner -->
+    <g transform="translate(0, 60)">
+      <!-- Banner Box -->
+      <polygon points="-280,-20 280,-20 260,20 -260,20" fill="#212121" stroke="#FFD54F" stroke-width="3"/>
+      <text x="0" y="8" text-anchor="middle"
+            font-family="'Arial Black', 'Impact', sans-serif" font-weight="bold" font-size="24"
+            letter-spacing="8" fill="#FFFFFF">
+        PLAYSTATION 4 EDITION
+      </text>
+    </g>
+  </g>
+
+  <!-- PS4 Corner Badge (Clean Vector) -->
+  <g transform="translate(60, 60)" opacity="0.9">
+    <rect width="180" height="50" rx="8" fill="#0D47A1" stroke="#42A5F5" stroke-width="2"/>
+    <text x="90" y="34" text-anchor="middle"
+          font-family="'Arial Black', sans-serif" font-size="26" font-weight="bold" fill="#FFFFFF">
+      PS4™
+    </text>
+  </g>
+</svg>

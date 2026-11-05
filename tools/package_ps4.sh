@@ -93,20 +93,28 @@ fi
 
 cp "$repo/LICENSE" "$repo/NOTICE.md" "$staging/"
 
+# Convert SVG assets to PNG if rsvg-convert is available
+if [ -f "$repo/res/ps4/pic1.svg" ] && [ ! -f "$repo/res/ps4/pic1.png" ] && command -v rsvg-convert >/dev/null 2>&1; then
+    rsvg-convert -w 1920 -h 1080 -f png -o "$repo/res/ps4/pic1.png" "$repo/res/ps4/pic1.svg"
+    cp "$repo/res/ps4/pic1.png" "$repo/res/ps4/pic0.png"
+fi
+
 icon=""
-if [ -f "$repo/res/ps4/icon0_source.jpg" ]; then
-    icon="$repo/res/ps4/icon0_source.jpg"
-elif [ -f "$repo/res/ps4/icon0.png" ]; then
+if [ -f "$repo/res/ps4/icon0.png" ]; then
     icon="$repo/res/ps4/icon0.png"
+elif [ -f "$repo/res/ps4/icon0_android.png" ]; then
+    icon="$repo/res/ps4/icon0_android.png"
+elif [ -f "$repo/res/ps4/icon0.svg" ]; then
+    icon="$repo/res/ps4/icon0.svg"
 elif [ -f "$repo/docs/screenshots/main-menu.png" ]; then
     icon="$repo/docs/screenshots/main-menu.png"
 fi
 
 bg=""
-if [ -f "$repo/res/ps4/pic1_source.jpg" ]; then
-    bg="$repo/res/ps4/pic1_source.jpg"
-elif [ -f "$repo/res/ps4/pic1.png" ]; then
+if [ -f "$repo/res/ps4/pic1.png" ]; then
     bg="$repo/res/ps4/pic1.png"
+elif [ -f "$repo/res/ps4/pic1.svg" ]; then
+    bg="$repo/res/ps4/pic1.svg"
 elif [ -f "$repo/docs/screenshots/campaign.png" ]; then
     bg="$repo/docs/screenshots/campaign.png"
 fi

@@ -112,7 +112,22 @@ def create_blank_png(path, width=512, height=512):
 
 
 def resize_image_to_png(src_path, dst_path, width, height):
-    """Resizes and converts any image (JPG/PNG) to exact width x height PNG."""
+    """Resizes and converts any image (SVG/JPG/PNG) to exact width x height PNG."""
+    # If source is SVG, prefer rsvg-convert
+    if src_path.lower().endswith(".svg"):
+        rsvg = shutil.which("rsvg-convert")
+        if rsvg:
+            try:
+                subprocess.check_call(
+                    [rsvg, "-w", str(width), "-h", str(height), "-f", "png", "-o", dst_path, src_path],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                print(f"rsvg-convert {src_path} -> {dst_path} ({width}x{height})")
+                return True
+            except Exception as e:
+                print(f"rsvg-convert failed ({e}), trying fallbacks...")
+
     try:
         from PIL import Image
         with Image.open(src_path) as im:
