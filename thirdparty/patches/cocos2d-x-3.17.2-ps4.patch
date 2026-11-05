@@ -1,20 +1,20 @@
 diff --git a/cmake/Modules/CocosConfigDefine.cmake b/cmake/Modules/CocosConfigDefine.cmake
-index 4525083..c5cbe5c 100644
+index 4525083..14b7c94 100644
 --- a/cmake/Modules/CocosConfigDefine.cmake
 +++ b/cmake/Modules/CocosConfigDefine.cmake
 @@ -9,9 +9,15 @@
       set(PLATFORM_FOLDER win32)
   elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
       set(PLATFORM_FOLDER android)
-+     elseif(PS4)
-+         set(PS4 TRUE)
-+         set(PLATFORM_FOLDER ps4)
++ elseif(PS4 OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD|PS4|Orbis")
++     set(PS4 TRUE)
++     set(PLATFORM_FOLDER ps4)
   elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
       if(ANDROID)
           set(PLATFORM_FOLDER android)
-+     elseif(PS4)
-+         set(PS4 TRUE)
-+         set(PLATFORM_FOLDER ps4)
++ elseif(PS4 OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD|PS4|Orbis")
++     set(PS4 TRUE)
++     set(PLATFORM_FOLDER ps4)
       else()
           set(LINUX TRUE)
           set(PLATFORM_FOLDER linux)
