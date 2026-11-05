@@ -74,15 +74,15 @@ index f26faa9..d1c18cd 100644
      # OpenWheels: the OpenAL backend of win32 (portable C++11 + OpenAL), as cocos2d-x 4 does.
      set(COCOS_AUDIO_PLATFORM_HEADER
 diff --git a/cocos/base/CCConsole.cpp b/cocos/base/CCConsole.cpp
-index d26f02b..54c2cfb 100644
+index d26f02b..b82324f 100644
 --- a/cocos/base/CCConsole.cpp
 +++ b/cocos/base/CCConsole.cpp
 @@ -57,6 +57,9 @@
  #include <sys/socket.h>
  #include <sys/un.h>
  #include <sys/ioctl.h>
-+#if defined(__FreeBSD__) || defined(__ORBIS__) || defined(PS4) || defined(__PS4__)
-+#include <sys/filio.h>
++#ifndef FIONREAD
++#define FIONREAD 0x4004667F
 +#endif
  #endif
  
