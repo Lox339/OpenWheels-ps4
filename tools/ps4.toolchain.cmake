@@ -35,7 +35,7 @@ set(PS4_DEFS "-D__ORBIS__=1 -DPS4=1 -D__FreeBSD__=12 -D__FreeBSD_version=1200000
 set(CMAKE_C_FLAGS_INIT "--target=${TRIPLE} -fPIC -funwind-tables -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include ${PS4_DEFS}")
 set(CMAKE_CXX_FLAGS_INIT "--target=${TRIPLE} -fPIC -funwind-tables -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include/c++/v1 -isystem ${OO_PS4_TOOLCHAIN}/include ${PS4_DEFS}")
 
-set(_PS4_LINK "\"${PS4_LINKER}\" -m elf_x86_64 -pie --script \"${OO_PS4_TOOLCHAIN}/link.x\" --eh-frame-hdr -o <TARGET> \"${OO_PS4_TOOLCHAIN}/lib/crt1.o\" <OBJECTS> <LINK_FLAGS> -L\"${OO_PS4_TOOLCHAIN}/lib\" --start-group <LINK_LIBRARIES> -lc -lkernel -lc++ --end-group")
+set(_PS4_LINK "\"${PS4_LINKER}\" -m elf_x86_64 -pie --script \"${OO_PS4_TOOLCHAIN}/link.x\" --eh-frame-hdr --allow-multiple-definition -o <TARGET> \"${OO_PS4_TOOLCHAIN}/lib/crt1.o\" <OBJECTS> <LINK_FLAGS> -L\"${OO_PS4_TOOLCHAIN}/lib\" --start-group <LINK_LIBRARIES> -lc -lkernel -lc++ --end-group")
 set(CMAKE_C_LINK_EXECUTABLE "${_PS4_LINK}")
 set(CMAKE_CXX_LINK_EXECUTABLE "${_PS4_LINK}")
 
