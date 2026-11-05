@@ -4,6 +4,7 @@
 #include "platform/CCPlatformConfig.h"
 #if CC_TARGET_PLATFORM == CC_PLATFORM_PS4
 
+#include "platform/CCCommon.h"
 #include "platform/CCApplicationProtocol.h"
 #include <string>
 

@@ -18,7 +18,7 @@ protected:
 public:
     bool init() override;
     std::string getWritablePath() const override;
-    void setWritablePath(const std::string& path);
+    void setWritablePath(const std::string& path) override;
 private:
     bool isFileExistInternal(const std::string& strFilePath) const override;
 };
