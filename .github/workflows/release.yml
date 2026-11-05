@@ -162,6 +162,10 @@ jobs:
             mkdir -p thirdparty/cocos2d-x/external/freetype2/prebuilt/linux/64-bit
             cp -f "${OO_PS4_TOOLCHAIN}/lib/freetype_pic/libfreetype.a" thirdparty/cocos2d-x/external/freetype2/prebuilt/linux/64-bit/libfreetype.a
           fi
+          if [ -f "${OO_PS4_TOOLCHAIN:-}/lib/zlib_full/libz.a" ]; then
+            mkdir -p thirdparty/cocos2d-x/external/zlib/prebuilt/linux/64-bit
+            cp -f "${OO_PS4_TOOLCHAIN}/lib/zlib_full/libz.a" thirdparty/cocos2d-x/external/zlib/prebuilt/linux/64-bit/libz.a
+          fi
           cmake -S . -B build-ps4 \
             -DCMAKE_TOOLCHAIN_FILE=tools/ps4.toolchain.cmake \
             -DCMAKE_BUILD_TYPE=Release \

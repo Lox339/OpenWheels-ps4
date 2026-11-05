@@ -110,6 +110,12 @@ if [ -f "${OO_PS4_TOOLCHAIN:-}/lib/freetype_pic/libfreetype.a" ]; then
     cp -f "${OO_PS4_TOOLCHAIN}/lib/freetype_pic/libfreetype.a" "$engine/external/freetype2/prebuilt/linux/64-bit/libfreetype.a"
 fi
 
+if [ -f "${OO_PS4_TOOLCHAIN:-}/lib/zlib_full/libz.a" ]; then
+    step "replacing prebuilt zlib with PS4 full zlib"
+    mkdir -p "$engine/external/zlib/prebuilt/linux/64-bit"
+    cp -f "${OO_PS4_TOOLCHAIN}/lib/zlib_full/libz.a" "$engine/external/zlib/prebuilt/linux/64-bit/libz.a"
+fi
+
 if [ ! -f "$engine/cocos/cocos2d.h" ] || [ ! -d "$engine/external/Box2D/prebuilt" ]; then
     echo "engine setup incomplete: $engine" >&2
     exit 1
